@@ -400,9 +400,10 @@ app.put('/api/tasks/:id', async (req, res) => {
             if (webhookSetting && webhookSetting.value) {
                 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
                 
-                // Get who did this action (from body since Cloudflare strips custom headers)
-                let completedBy = req.body._completedBy || 'Bilinmiyor';
+                // Get who did this action (from body or header)
+                let completedBy = req.body._completedBy || req.headers['x-user'] || 'Bilinmiyor';
                 console.log('[WEBHOOK DEBUG] _completedBy from body:', req.body._completedBy);
+                console.log('[WEBHOOK DEBUG] x-user from header:', req.headers['x-user']);
                 console.log('[WEBHOOK DEBUG] completedBy:', completedBy);
                 
                 // If x-user is empty, try assignee
