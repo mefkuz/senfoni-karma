@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-const Notification = require('./models/Notification');
+
 const Setting = require('./models/Setting');
 const { Server } = require('socket.io');
 const http = require('http');
