@@ -150,7 +150,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         try {
             const res = await fetch(`/api/tasks/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-user': user },
                 body: JSON.stringify({ ...task, status })
             });
             const updated = await res.json();
@@ -178,7 +178,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
             if (editingTaskId) {
                 const res = await fetch(`/api/tasks/${editingTaskId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'x-user': user },
                     body: JSON.stringify(payload)
                 });
                 const updatedTask = await res.json();
@@ -187,7 +187,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
             } else {
                 const res = await fetch('/api/tasks', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'x-user': user },
                     body: JSON.stringify(payload)
                 });
                 const savedTask = await res.json();
@@ -256,7 +256,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         try {
             const res = await fetch(`/api/tasks/${taskToComplete._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', 'x-user': user },
                 body: JSON.stringify({ ...taskToComplete, status: 'review', report: reportText, attachment: reportFile })
             });
             const updated = await res.json();

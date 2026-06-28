@@ -399,11 +399,31 @@ app.put('/api/tasks/:id', async (req, res) => {
             if (webhookSetting && webhookSetting.value) {
                 // Ignore self-signed certs for local CTF networks just in case
                 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+                
+                const completedBy = req.headers['x-user'] || (task.assignee ? task.assignee.username : 'Bir ekip üyesi');
+                
                 await fetch(webhookSetting.value, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        content: `✅ Görev Tamamlandı: **${decryptedTask.title}**\nKim tarafından: ${task.assignee ? task.assignee.username : 'Bir ekip üyesi'}`
+                        embeds: [{
+                            title: "✅ Görev Tamamlandı!",
+                            description: `**${decryptedTask.title}** başarıyla tamamlandı.`,
+                            color: 3066993, // Green color
+                            fields: [
+                                {
+                                    name: "Operasyon",
+                                    value: decryptedTask.operationId ? decryptedTask.operationId.name : 'Bilinmiyor',
+                                    inline: true
+                                },
+                                {
+                                    name: "Tamamlayan",
+                                    value: completedBy,
+                                    inline: true
+                                }
+                            ],
+                            timestamp: new Date().toISOString()
+                        }]
                     })
                 });
             }
@@ -517,7 +537,24 @@ app.post('/api/settings/test-webhook', async (req, res) => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                content: `🔔 **WEBHOOK TESTİ**\nBu bir test mesajıdır. Sistem çalıştığında görev tamamlamaları bu şekilde görünecektir.\n\n✅ Görev Tamamlandı: **Sunucu Sızma Testi Raporu**\nKim tarafından: Verbum`
+                embeds: [{
+                    title: "🔔 Webhook Testi",
+                    description: "Bu bir test mesajıdır. Sistem çalıştığında görev tamamlamaları bu şekilde görünecektir.",
+                    color: 3447003, // Blue color
+                    fields: [
+                        {
+                            name: "Operasyon",
+                            value: "Test Operasyonu",
+                            inline: true
+                        },
+                        {
+                            name: "Tamamlayan",
+                            value: "Test Kullanıcısı",
+                            inline: true
+                        }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
             })
         });
         res.json({ success: true });
