@@ -55,18 +55,22 @@ const OperationSelect = ({ onSelect, role, user }) => {
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Tüm Operasyonlar</span>
                         </div>
 
-                        {operations.map(op => (
-                            <div 
-                                key={op._id}
-                                onClick={() => onSelect(op._id)}
-                                style={{ flex: '1 1 250px', maxWidth: '350px', background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px', position: 'relative' }}
-                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
-                                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
-                            >
-                                <i className="bi bi-briefcase" style={{ fontSize: '2.5rem', color: 'var(--text-main)' }}></i>
-                                <h3 style={{ margin: 0, textAlign: 'center' }}>{op.name}</h3>
-                            </div>
-                        ))}
+                        {operations.map((op, idx) => {
+                            const opIcons = ['bi-briefcase', 'bi-shield-check', 'bi-hdd-network', 'bi-server', 'bi-terminal', 'bi-bug', 'bi-crosshair', 'bi-radar', 'bi-cpu'];
+                            const IconClass = opIcons[idx % opIcons.length];
+                            return (
+                                <div 
+                                    key={op._id}
+                                    onClick={() => onSelect(op._id)}
+                                    style={{ flex: '1 1 250px', maxWidth: '350px', background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px', position: 'relative' }}
+                                    onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
+                                    onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
+                                >
+                                    <i className={`bi ${IconClass}`} style={{ fontSize: '2.5rem', color: 'var(--text-main)' }}></i>
+                                    <h3 style={{ margin: 0, textAlign: 'center' }}>{op.name}</h3>
+                                </div>
+                            );
+                        })}
 
                         {isChatAdmin && (
                             <div 
