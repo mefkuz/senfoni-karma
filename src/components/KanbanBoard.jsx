@@ -32,7 +32,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
                 .catch(console.error);
         };
         fetchTasks();
-        const intervalId = setInterval(fetchTasks, 5000); // Auto-refresh every 5s
+        // No polling needed — Socket.IO handles real-time updates
 
         fetch('/api/members')
             .then(res => res.json())
@@ -65,7 +65,11 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         
         socket.on('task_update', (data) => {
             if (data.action === 'create') {
-                setTasks(prev => [...prev, data.task].sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]));
+                setTasks(prev => {
+                    // Prevent duplicates
+                    if (prev.some(t => t._id === data.task._id)) return prev;
+                    return [...prev, data.task].sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]);
+                });
             } else if (data.action === 'update') {
                 setTasks(prev => prev.map(t => t._id === data.task._id ? data.task : t).sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]));
             } else if (data.action === 'delete') {
@@ -75,7 +79,6 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
 
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
-            clearInterval(intervalId);
             socket.disconnect();
         };
     }, []);
@@ -126,13 +129,12 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
             }
             // Admins can just drop to done directly
             try {
-                const res = await fetch(`/api/tasks/${id}`, {
+                await fetch(`/api/tasks/${id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'x-user': user },
                     body: JSON.stringify({ ...task, status: 'done' })
                 });
-                const updated = await res.json();
-                setTasks(tasks.map(t => t._id === id ? updated : t));
+                // Socket.IO will update state
             } catch (err) {
                 console.error('Drag drop error:', err);
             }
@@ -148,13 +150,12 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         }
 
         try {
-            const res = await fetch(`/api/tasks/${id}`, {
+            await fetch(`/api/tasks/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'x-user': user },
                 body: JSON.stringify({ ...task, status })
             });
-            const updated = await res.json();
-            setTasks(tasks.map(t => t._id === id ? updated : t));
+            // Socket.IO will update state
         } catch (err) {
             console.error('Drag drop error:', err);
         }
@@ -176,22 +177,20 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
             };
 
             if (editingTaskId) {
-                const res = await fetch(`/api/tasks/${editingTaskId}`, {
+                await fetch(`/api/tasks/${editingTaskId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'x-user': user },
                     body: JSON.stringify(payload)
                 });
-                const updatedTask = await res.json();
-                setTasks(tasks.map(t => t._id === editingTaskId ? updatedTask : t));
+                // Socket.IO will update the state
                 setEditingTaskId(null);
             } else {
-                const res = await fetch('/api/tasks', {
+                await fetch('/api/tasks', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-user': user },
                     body: JSON.stringify(payload)
                 });
-                const savedTask = await res.json();
-                setTasks([...tasks, savedTask].sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]));
+                // Socket.IO will add the task to state
             }
             
             setIsAdding(false);
@@ -204,7 +203,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
     const handleDeleteTask = async (id) => {
         if (!window.confirm('Bu görevi silmek istediğinize emin misiniz?')) return;
         await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
-        setTasks(tasks.filter(t => t._id !== id));
+        // Socket.IO will remove from state
     };
 
     const handleEditTask = (task) => {
@@ -259,8 +258,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
                 headers: { 'Content-Type': 'application/json', 'x-user': user },
                 body: JSON.stringify({ ...taskToComplete, status: 'review', report: reportText, attachment: reportFile })
             });
-            const updated = await res.json();
-            setTasks(tasks.map(t => t._id === taskToComplete._id ? updated : t));
+            // Socket.IO will update state
             setSelectedTask(null);
             setCompletingTask(null);
         } catch (err) {
