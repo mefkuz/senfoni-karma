@@ -18,9 +18,7 @@ function App() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeOperation, setActiveOperation] = useState(localStorage.getItem('senfoni_active_operation') || '');
-    const [hasSelectedOperation, setHasSelectedOperation] = useState(() => {
-        return localStorage.getItem('senfoni_has_selected_op') === 'true';
-    });
+    const [hasSelectedOperation, setHasSelectedOperation] = useState(false);
 
     const handleOperationChange = (opId) => {
         setActiveOperation(opId);
@@ -28,9 +26,14 @@ function App() {
     };
 
     const handleInitialOperationSelect = (opId) => {
-        handleOperationChange(opId);
+        if (opId === 'ADMIN_PANEL') {
+            handleOperationChange('');
+            setActiveTab('team');
+        } else {
+            handleOperationChange(opId);
+            setActiveTab('dashboard');
+        }
         setHasSelectedOperation(true);
-        localStorage.setItem('senfoni_has_selected_op', 'true');
     };
 
     const handleTabChange = (tab) => {

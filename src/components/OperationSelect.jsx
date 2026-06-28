@@ -99,6 +99,19 @@ const OperationSelect = ({ onSelect, role }) => {
                                 )}
                             </div>
                         ))}
+
+                        {isChatAdmin && (
+                            <div 
+                                onClick={() => onSelect('ADMIN_PANEL')}
+                                style={{ background: 'linear-gradient(145deg, var(--bg-card), var(--bg-main))', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--accent)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px' }}
+                                onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 0 15px rgba(233,69,96,0.3)'; }}
+                                onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                            >
+                                <i className="bi bi-shield-lock" style={{ fontSize: '2.5rem', color: 'var(--accent)' }}></i>
+                                <h3 style={{ margin: 0, color: 'var(--accent)' }}>Admin Paneli</h3>
+                                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center' }}>Ekip, Üye ve Platform Yönetimi</span>
+                            </div>
+                        )}
                     </div>
                 )}
 
