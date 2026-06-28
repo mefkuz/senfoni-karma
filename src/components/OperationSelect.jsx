@@ -4,8 +4,9 @@ const OperationSelect = ({ onSelect, role, user }) => {
     const [operations, setOperations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dbRole, setDbRole] = useState(role || '');
+    const [isAdminTeam, setIsAdminTeam] = useState(false);
 
-    const isChatAdmin = dbRole && (dbRole.toLowerCase() === 'admin' || dbRole.toLowerCase() === 'moderator');
+    const isChatAdmin = (dbRole && (dbRole.toLowerCase() === 'admin' || dbRole.toLowerCase() === 'moderator')) || isAdminTeam;
 
 
 
@@ -19,6 +20,7 @@ const OperationSelect = ({ onSelect, role, user }) => {
             if (user) {
                 const me = membersData.find(m => m.username === user);
                 if (me && me.role) setDbRole(me.role);
+                if (me && me.teamId && me.teamId.isAdminTeam) setIsAdminTeam(true);
             }
             setLoading(false);
         })

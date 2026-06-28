@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { io } from 'socket.io-client';
 
 const KanbanBoard = ({ user, role, activeOperation }) => {
     const [tasks, setTasks] = useState([]);
@@ -60,9 +61,22 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
             }
         };
         window.addEventListener('keydown', handleKeyDown);
+        const socket = io('/', { path: '/socket.io' });
+        
+        socket.on('task_update', (data) => {
+            if (data.action === 'create') {
+                setTasks(prev => [...prev, data.task].sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]));
+            } else if (data.action === 'update') {
+                setTasks(prev => prev.map(t => t._id === data.task._id ? data.task : t).sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency]));
+            } else if (data.action === 'delete') {
+                setTasks(prev => prev.filter(t => t._id !== data.taskId));
+            }
+        });
+
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
             clearInterval(intervalId);
+            socket.disconnect();
         };
     }, []);
 

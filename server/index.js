@@ -29,7 +29,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+const Notification = require('./models/Notification');
+const Setting = require('./models/Setting');
+const { Server } = require('socket.io');
+const http = require('http');
+
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+app.use(express.json({ limit: '50mb' }));
 app.use(cors());
 app.use(express.json());
 
@@ -358,6 +367,8 @@ app.post('/api/tasks', async (req, res) => {
     const obj = decryptFields(task, TASK_ENC);
     if (obj.teamId) obj.teamId = decryptFields(obj.teamId, TEAM_ENC);
     if (obj.operationId) obj.operationId = decryptFields(obj.operationId, OPE_ENC);
+    
+    io.emit('task_update', { action: 'create', task: obj });
     res.json(obj);
 });
 
@@ -376,13 +387,32 @@ app.put('/api/tasks/:id', async (req, res) => {
             message: encrypt(notifMsg)
         });
         await notif.save();
+        
+        try {
+            const webhookSetting = await Setting.findOne({ key: 'WEBHOOK_URL' });
+            if (webhookSetting && webhookSetting.value) {
+                // Ignore self-signed certs for local CTF networks just in case
+                process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+                await fetch(webhookSetting.value, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `✅ Görev Tamamlandı: **${decryptedTask.title}**\nKim tarafından: ${task.assignee ? task.assignee.username : 'Bir ekip üyesi'}`
+                    })
+                });
+            }
+        } catch (e) {
+            console.error('Webhook error:', e);
+        }
     }
     
+    io.emit('task_update', { action: 'update', task: decryptedTask });
     res.json(decryptedTask);
 });
 
 app.delete('/api/tasks/:id', async (req, res) => {
     await Task.findByIdAndDelete(req.params.id);
+    io.emit('task_update', { action: 'delete', taskId: req.params.id });
     res.json({ success: true });
 });
 
@@ -458,6 +488,18 @@ app.post('/api/messages', requireUser, async (req, res) => {
     res.json(decryptFields(newMsg, MSG_ENC));
 });
 
+// Settings API
+app.get('/api/settings', async (req, res) => {
+    const settings = await Setting.find();
+    res.json(settings);
+});
+
+app.post('/api/settings', async (req, res) => {
+    const { key, value } = req.body;
+    await Setting.findOneAndUpdate({ key }, { value }, { upsert: true });
+    res.json({ success: true });
+});
+
 // Serve frontend
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath, { index: false })); // Don't serve index.html automatically
@@ -470,4 +512,4 @@ app.use((req, res) => {
 });
 
 const PORT = process.env.PORT || 80;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
