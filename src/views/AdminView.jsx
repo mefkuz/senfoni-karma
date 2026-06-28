@@ -208,6 +208,18 @@ const AdminView = ({ user, role, onExit }) => {
         } catch (err) { console.error(err); }
     };
 
+    const handleTestWebhook = async () => {
+        try {
+            const res = await fetch('/api/settings/test-webhook', { method: 'POST' });
+            if (res.ok) {
+                alert('Test mesajı gönderildi! Lütfen webhook kanalınızı kontrol edin.');
+            } else {
+                const data = await res.json();
+                alert('Hata: ' + data.error);
+            }
+        } catch (err) { console.error(err); }
+    };
+
     return (
         <div style={{ minHeight: '100vh', background: 'var(--bg-main)', color: 'var(--text-main)', padding: '2rem' }}>
             <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
@@ -233,6 +245,7 @@ const AdminView = ({ user, role, onExit }) => {
                         <form onSubmit={handleSaveWebhook} style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                             <input type="url" placeholder="Görev bittiğinde istek atılacak Webhook URL'si (Örn: Discord Webhook)" value={webhookUrl} onChange={e => setWebhookUrl(e.target.value)} style={{ flex: 1, padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)' }} />
                             <button type="submit" className="btn-primary"><i className="bi bi-save"></i> Kaydet</button>
+                            <button type="button" onClick={handleTestWebhook} className="btn-secondary" style={{ background: 'var(--bg-main)', border: '1px solid var(--border)', color: 'var(--text-main)' }}><i className="bi bi-send"></i> Test Et</button>
                         </form>
                     </section>
 

@@ -506,6 +506,27 @@ app.post('/api/settings', async (req, res) => {
     res.json({ success: true });
 });
 
+app.post('/api/settings/test-webhook', async (req, res) => {
+    try {
+        const webhookSetting = await Setting.findOne({ key: 'WEBHOOK_URL' });
+        if (!webhookSetting || !webhookSetting.value) {
+            return res.status(400).json({ error: 'Webhook URL bulunamadı.' });
+        }
+        process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+        await fetch(webhookSetting.value, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                content: `🔔 **WEBHOOK TESTİ**\nBu bir test mesajıdır. Sistem çalıştığında görev tamamlamaları bu şekilde görünecektir.\n\n✅ Görev Tamamlandı: **Sunucu Sızma Testi Raporu**\nKim tarafından: Verbum`
+            })
+        });
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Webhook test error:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Serve frontend
 const distPath = path.join(__dirname, 'dist');
 app.use(express.static(distPath, { index: false })); // Don't serve index.html automatically
