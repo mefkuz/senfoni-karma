@@ -182,6 +182,16 @@ app.all('/api/chat-admin', requireUser, async (req, res) => {
 
         const response = await fetch('http://senfoni-chat:3000/api/admin', fetchOptions);
         const data = await response.json();
+        
+        if (response.ok && data.success) {
+            if (req.body && req.body.action === 'delete-user') {
+                await Member.deleteOne({ username: req.body.name });
+            } else if (req.body && req.body.action === 'create-user') {
+                const newMem = new Member({ username: req.body.name, role: 'user' });
+                await newMem.save();
+            }
+        }
+        
         res.status(response.status).json(data);
     } catch (e) {
         res.status(500).json({ error: e.message });

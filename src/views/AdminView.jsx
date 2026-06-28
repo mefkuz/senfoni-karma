@@ -23,7 +23,7 @@ const AdminView = ({ user, role, onExit }) => {
         if (apiKey) {
             fetch('/api/chat-admin', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey, 'X-User': localStorage.getItem('senfoni_user') },
                 body: JSON.stringify({ action: 'list-users' })
             }).then(r => r.json()).then(data => {
                 if (data.users) setChatUsers(data.users);
@@ -137,7 +137,7 @@ const AdminView = ({ user, role, onExit }) => {
         try {
             const res = await fetch('/api/chat-admin', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey, 'X-User': localStorage.getItem('senfoni_user') },
                 body: JSON.stringify({ action: 'create-user', name: newChatUser.trim() })
             });
             const data = await res.json();
@@ -157,7 +157,7 @@ const AdminView = ({ user, role, onExit }) => {
         try {
             const res = await fetch('/api/chat-admin', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey, 'X-User': localStorage.getItem('senfoni_user') },
                 body: JSON.stringify({ action: 'delete-user', name: username })
             });
             const data = await res.json();
@@ -176,7 +176,7 @@ const AdminView = ({ user, role, onExit }) => {
         try {
             const res = await fetch('/api/chat-admin', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey, 'X-User': localStorage.getItem('senfoni_user') },
                 body: JSON.stringify({ action: 'gen-api', name: username })
             });
             const data = await res.json();
