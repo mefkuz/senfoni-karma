@@ -11,8 +11,10 @@ const ApiModal = ({ onClose }) => {
     const handleSave = () => {
         if (apiKey.trim()) {
             localStorage.setItem('senfoni_chat_api_key', apiKey.trim());
+            localStorage.setItem('senfoni_api_key', apiKey.trim());
         } else {
             localStorage.removeItem('senfoni_chat_api_key');
+            localStorage.removeItem('senfoni_api_key');
         }
         onClose();
     };

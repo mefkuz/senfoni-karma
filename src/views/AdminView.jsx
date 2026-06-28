@@ -19,7 +19,7 @@ const AdminView = ({ user, role, onExit }) => {
         fetch('/api/teams').then(r => r.json()).then(setTeams);
         fetch('/api/members').then(r => r.json()).then(setKarmaMembers);
         
-        const apiKey = localStorage.getItem('senfoni_api_key');
+        const apiKey = localStorage.getItem('senfoni_api_key') || localStorage.getItem('senfoni_chat_api_key');
         if (apiKey) {
             fetch('/api/chat-admin', {
                 method: 'POST',
@@ -133,7 +133,7 @@ const AdminView = ({ user, role, onExit }) => {
     const handleCreateChatUser = async (e) => {
         e.preventDefault();
         if (!newChatUser.trim()) return;
-        const apiKey = localStorage.getItem('senfoni_api_key');
+        const apiKey = localStorage.getItem('senfoni_api_key') || localStorage.getItem('senfoni_chat_api_key');
         try {
             const res = await fetch('/api/chat-admin', {
                 method: 'POST',
@@ -153,7 +153,7 @@ const AdminView = ({ user, role, onExit }) => {
 
     const handleDeleteChatUser = async (username) => {
         if (!window.confirm(`[${username}] kullanıcısını silmek istediğinize emin misiniz? Tüm erişimi iptal edilecek.`)) return;
-        const apiKey = localStorage.getItem('senfoni_api_key');
+        const apiKey = localStorage.getItem('senfoni_api_key') || localStorage.getItem('senfoni_chat_api_key');
         try {
             const res = await fetch('/api/chat-admin', {
                 method: 'POST',
@@ -172,7 +172,7 @@ const AdminView = ({ user, role, onExit }) => {
 
     const handleGenApiKey = async (username) => {
         if (!window.confirm(`[${username}] için yeni bir API anahtarı oluşturulacak. Eski anahtar geçersiz olacak. Devam edilsin mi?`)) return;
-        const apiKey = localStorage.getItem('senfoni_api_key');
+        const apiKey = localStorage.getItem('senfoni_api_key') || localStorage.getItem('senfoni_chat_api_key');
         try {
             const res = await fetch('/api/chat-admin', {
                 method: 'POST',
