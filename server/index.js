@@ -398,9 +398,12 @@ app.put('/api/tasks/:id', async (req, res) => {
             const webhookSetting = await Setting.findOne({ key: 'WEBHOOK_URL' });
             if (webhookSetting && webhookSetting.value) {
                 // Ignore self-signed certs for local CTF networks just in case
-                process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+                const completedBy = req.headers['x-user'] || (task.assignee ? task.assignee.username : 'Bilinmiyor');
                 
-                const completedBy = req.headers['x-user'] || (task.assignee ? task.assignee.username : 'Bir ekip üyesi');
+                // Fetch the user's team
+                const member = await mongoose.model('Member').findOne({ username: completedBy }).populate('teamId');
+                const teamName = member && member.teamId ? member.teamId.name : 'Bilinmiyor';
+
                 const titleText = req.body.status === 'review' ? "✅ Görev Tamamlandı (İnceleme Bekliyor)" : "🏆 Görev Onaylandı";
                 const colorCode = req.body.status === 'review' ? 15105570 : 3066993; // Orange for review, Green for done
                 
@@ -421,6 +424,11 @@ app.put('/api/tasks/:id', async (req, res) => {
                                 {
                                     name: "İşlemi Yapan",
                                     value: completedBy,
+                                    inline: true
+                                },
+                                {
+                                    name: "Ekip",
+                                    value: teamName,
                                     inline: true
                                 }
                             ],
@@ -546,12 +554,17 @@ app.post('/api/settings/test-webhook', async (req, res) => {
                     fields: [
                         {
                             name: "Operasyon",
-                            value: "Test Operasyonu",
+                            value: "Sızma Testi",
                             inline: true
                         },
                         {
-                            name: "Tamamlayan",
+                            name: "İşlemi Yapan",
                             value: "Test Kullanıcısı",
+                            inline: true
+                        },
+                        {
+                            name: "Ekip",
+                            value: "Red Team",
                             inline: true
                         }
                     ],
