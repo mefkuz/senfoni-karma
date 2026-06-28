@@ -17,7 +17,7 @@ const OperationSelect = ({ onSelect, role, user }) => {
         ])
         .then(([opsData, membersData]) => {
             setOperations(opsData);
-            if (!role && user) {
+            if (user) {
                 const me = membersData.find(m => m.username === user);
                 if (me && me.role) setDbRole(me.role);
             }
