@@ -346,7 +346,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
                                 )}
                                 {task.assignee && (
                                     <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                        <div style={{ width: '20px', height: '20px', background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'black', fontWeight: 'bold' }}>
+                                        <div style={{ width: '20px', height: '20px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontWeight: 'bold' }}>
                                             {task.assignee.username.charAt(0).toUpperCase()}
                                         </div>
                                         <span>{task.assignee.username}</span>
