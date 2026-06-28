@@ -116,6 +116,9 @@ app.post('/api/auth', async (req, res) => {
             if (!member) {
                 member = new Member({ username: chatData.username, role: chatData.role });
                 await member.save();
+            } else if (member.role !== chatData.role) {
+                member.role = chatData.role;
+                await member.save();
             }
 
             // If the user is an admin, automatically sync all users from Senfoni Chat
@@ -130,6 +133,9 @@ app.post('/api/auth', async (req, res) => {
                             let existing = await Member.findOne({ username: u.username });
                             if (!existing) {
                                 await (new Member({ username: u.username, role: u.role })).save();
+                            } else if (existing.role !== u.role) {
+                                existing.role = u.role;
+                                await existing.save();
                             }
                         }
                     }

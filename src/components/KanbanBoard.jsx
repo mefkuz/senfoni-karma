@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const KanbanBoard = ({ user }) => {
+const KanbanBoard = ({ user, role }) => {
     const [tasks, setTasks] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -62,7 +62,7 @@ const KanbanBoard = ({ user }) => {
 
     const currentMember = members.find(m => m.username === user);
     const inAdminTeam = currentMember && currentMember.teamId && currentMember.teamId.isAdminTeam;
-    const isAdmin = currentMember && (currentMember.role.toLowerCase() === 'admin' || currentMember.role.toLowerCase() === 'moderator' || inAdminTeam);
+    const isAdmin = role === 'admin' || role === 'moderator' || inAdminTeam;
 
     const canMoveTask = (task) => {
         if (!task) return false;
