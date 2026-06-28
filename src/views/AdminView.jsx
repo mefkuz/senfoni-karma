@@ -289,11 +289,14 @@ const AdminView = ({ user, role, onExit }) => {
                                                     {karmaMembers.filter(m => m.teamId && (m.teamId._id === team._id || m.teamId === team._id)).length > 0 ? (
                                                         <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                                                             {karmaMembers.filter(m => m.teamId && (m.teamId._id === team._id || m.teamId === team._id)).map(m => (
-                                                                <li key={m._id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                                    <div style={{ width: '20px', height: '20px', background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold' }}>
-                                                                        {m.username.charAt(0).toUpperCase()}
+                                                                <li key={m._id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                        <div style={{ width: '20px', height: '20px', background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold' }}>
+                                                                            {m.username.charAt(0).toUpperCase()}
+                                                                        </div>
+                                                                        <span>{m.username}</span>
                                                                     </div>
-                                                                    <span>{m.username}</span>
+                                                                    <button onClick={() => handleAssignMember(m._id, null)} style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1rem', padding: '0 0.2rem' }} title="Takımdan Çıkar"><i className="bi bi-x-circle"></i></button>
                                                                 </li>
                                                             ))}
                                                         </ul>
@@ -310,6 +313,34 @@ const AdminView = ({ user, role, onExit }) => {
                                     )}
                                 </div>
                             ))}
+                            {/* Unassigned Members Card */}
+                            <div style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', borderStyle: 'dashed' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div style={{ width: '100%' }}>
+                                        <h3 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-muted)' }}>Atanmamış Üyeler</h3>
+                                        <span className="tag" style={{ background: 'var(--bg-main)', color: 'var(--text-muted)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem', display: 'inline-block' }}>Ekipsiz</span>
+                                        <div style={{ marginTop: '1rem', fontSize: '0.85rem' }}>
+                                            <div style={{ color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Üyeler:</div>
+                                            {karmaMembers.filter(m => !m.teamId).length > 0 ? (
+                                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                                    {karmaMembers.filter(m => !m.teamId).map(m => (
+                                                        <li key={m._id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                <div style={{ width: '20px', height: '20px', background: 'var(--bg-main)', color: 'var(--text-muted)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold' }}>
+                                                                    {m.username.charAt(0).toUpperCase()}
+                                                                </div>
+                                                                <span style={{ color: 'var(--text-muted)' }}>{m.username}</span>
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Tüm üyeler atanmış</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
