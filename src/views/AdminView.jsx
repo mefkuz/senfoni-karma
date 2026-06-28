@@ -7,6 +7,9 @@ const AdminView = ({ user, role, onExit }) => {
     const [newOpDefaultTeam, setNewOpDefaultTeam] = useState('');
     const [newTeamName, setNewTeamName] = useState('');
     const [newIsAdminTeam, setNewIsAdminTeam] = useState(false);
+    const [editingTeamId, setEditingTeamId] = useState(null);
+    const [editTeamName, setEditTeamName] = useState('');
+    const [editIsAdminTeam, setEditIsAdminTeam] = useState(false);
 
     useEffect(() => {
         fetch('/api/operations').then(r => r.json()).then(setOperations);
@@ -77,6 +80,23 @@ const AdminView = ({ user, role, onExit }) => {
         try {
             const res = await fetch(`/api/teams/${id}`, { method: 'DELETE' });
             if (res.ok) setTeams(teams.filter(t => t._id !== id));
+        } catch (err) { console.error(err); }
+    };
+
+    const handleUpdateTeam = async (e, id) => {
+        e.preventDefault();
+        if (!editTeamName.trim()) return;
+        try {
+            const res = await fetch(`/api/teams/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: editTeamName, isAdminTeam: editIsAdminTeam })
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                setTeams(teams.map(t => t._id === id ? updated : t));
+                setEditingTeamId(null);
+            }
         } catch (err) { console.error(err); }
     };
 
@@ -158,13 +178,30 @@ const AdminView = ({ user, role, onExit }) => {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
                             {teams.map(team => (
                                 <div key={team._id} style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                                        <div>
-                                            <h3 style={{ margin: '0 0 0.5rem 0' }}>{team.name}</h3>
-                                            {team.isAdminTeam && <span className="tag" style={{ background: 'var(--danger)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>Yönetici Ekibi</span>}
+                                    {editingTeamId === team._id ? (
+                                        <form onSubmit={(e) => handleUpdateTeam(e, team._id)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                            <input type="text" value={editTeamName} onChange={e => setEditTeamName(e.target.value)} style={{ padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)' }} required />
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)' }}>
+                                                <input type="checkbox" checked={editIsAdminTeam} onChange={e => setEditIsAdminTeam(e.target.checked)} />
+                                                Yönetici Ekibi
+                                            </label>
+                                            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                                                <button type="submit" className="btn-primary" style={{ flex: 1 }}><i className="bi bi-check"></i> Kaydet</button>
+                                                <button type="button" onClick={() => setEditingTeamId(null)} className="btn-primary" style={{ flex: 1, background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)' }}>İptal</button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                            <div>
+                                                <h3 style={{ margin: '0 0 0.5rem 0' }}>{team.name}</h3>
+                                                {team.isAdminTeam && <span className="tag" style={{ background: 'var(--danger)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>Yönetici Ekibi</span>}
+                                            </div>
+                                            <div>
+                                                <button onClick={() => { setEditingTeamId(team._id); setEditTeamName(team.name); setEditIsAdminTeam(team.isAdminTeam || false); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginRight: '0.5rem' }}><i className="bi bi-pencil"></i></button>
+                                                <button onClick={() => handleDeleteTeam(team._id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><i className="bi bi-trash"></i></button>
+                                            </div>
                                         </div>
-                                        <button onClick={() => handleDeleteTeam(team._id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><i className="bi bi-trash"></i></button>
-                                    </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
