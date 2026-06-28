@@ -291,7 +291,7 @@ const AdminView = ({ user, role, onExit }) => {
                                                             {karmaMembers.filter(m => m.teamId && (m.teamId._id === team._id || m.teamId === team._id)).map(m => (
                                                                 <li key={m._id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
                                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                                                        <div style={{ width: '20px', height: '20px', background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold' }}>
+                                                                        <div style={{ width: '20px', height: '20px', background: 'var(--accent)', color: 'var(--bg-main)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold' }}>
                                                                             {m.username.charAt(0).toUpperCase()}
                                                                         </div>
                                                                         <span>{m.username}</span>
@@ -360,8 +360,8 @@ const AdminView = ({ user, role, onExit }) => {
                                 const kMember = karmaMembers.find(m => m.username === chatUser.username);
                                 return (
                                     <div key={chatUser.username} style={{ background: 'var(--bg-card)', padding: '1rem 1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', minWidth: '200px' }}>
-                                            <div style={{ width: '40px', height: '40px', background: chatUser.role === 'admin' ? 'var(--danger)' : 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '250px' }}>
+                                            <div style={{ width: '32px', height: '32px', background: 'var(--accent)', color: 'var(--bg-main)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '1.2rem' }}>
                                                 {chatUser.username.charAt(0).toUpperCase()}
                                             </div>
                                             <div>
