@@ -163,6 +163,31 @@ app.post('/api/auth', async (req, res) => {
     }
 });
 
+app.all('/api/chat-admin', requireUser, async (req, res) => {
+    try {
+        const member = await Member.findOne({ username: req.user });
+        if (!member || (member.role !== 'admin' && member.role !== 'moderator')) {
+            return res.status(403).json({ error: 'Yetkisiz işlem.' });
+        }
+        const apiKey = req.headers['x-api-key'];
+        if (!apiKey) return res.status(400).json({ error: 'API anahtarı gerekli.' });
+
+        const fetchOptions = {
+            method: req.method,
+            headers: { 'X-Senfoni-Key': apiKey, 'Content-Type': 'application/json' }
+        };
+        if (req.method !== 'GET' && req.method !== 'HEAD') {
+            fetchOptions.body = JSON.stringify(req.body);
+        }
+
+        const response = await fetch('http://senfoni-chat:3000/api/admin', fetchOptions);
+        const data = await response.json();
+        res.status(response.status).json(data);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // Stats Route for Dashboard
 app.get('/api/stats', async (req, res) => {
     try {

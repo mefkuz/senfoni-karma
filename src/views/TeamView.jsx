@@ -21,21 +21,7 @@ const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
 
 
 
-    const handleAssignMember = async (memberId, teamId) => {
-        try {
-            const res = await fetch(`/api/members/${memberId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ teamId: teamId || null })
-            });
-            if (res.ok) {
-                const updated = await res.json();
-                setMembers(members.map(m => m._id === memberId ? { ...m, teamId: updated.teamId } : m));
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
+
 
     const handleDeleteTeam = async (id) => {
         if (!window.confirm('Bu takımı silmek istediğinize emin misiniz?')) return;
@@ -111,9 +97,6 @@ const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
                                         </div>
                                         <span>{member.username}</span>
                                     </div>
-                                    {isAdmin && (
-                                        <button onClick={() => handleAssignMember(member._id, null)} style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer' }} title="Takımdan Çıkar"><i className="bi bi-x-circle"></i></button>
-                                    )}
                                 </li>
                             ))}
                             {members.filter(m => m.teamId && m.teamId._id === team._id).length === 0 && (
@@ -135,12 +118,6 @@ const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
                                     </div>
                                     <span>{member.username}</span>
                                 </div>
-                                {isAdmin && (
-                                    <select onChange={(e) => handleAssignMember(member._id, e.target.value)} defaultValue="" style={{ padding: '0.2rem', background: 'var(--bg-main)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                                        <option value="" disabled>Takıma Ata...</option>
-                                        {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
-                                    </select>
-                                )}
                             </li>
                         ))}
                     </ul>
