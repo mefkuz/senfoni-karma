@@ -17,7 +17,7 @@ const TAG_LENGTH = 16; // 128-bit auth tag
 
 // Derive a 32-byte key from the env var (or a default for dev)
 function getKey() {
-    const raw = process.env.KARMA_ENCRYPTION_KEY || 'senfoni-karma-default-encryption-key-2026';
+    const raw = process.env.KARMA_ENCRYPTION_KEY || 'development-fallback-key-change-me';
     // Use SHA-256 to normalize any string into exactly 32 bytes
     return crypto.createHash('sha256').update(raw).digest();
 }
