@@ -92,7 +92,7 @@ const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
                             {members.filter(m => m.teamId && m.teamId._id === team._id).map(member => (
                                 <li key={member._id} style={{ padding: '0.5rem 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '32px', height: '32px', background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+                                        <div style={{ width: '32px', height: '32px', background: 'var(--accent)', color: 'var(--bg-main)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
                                             {member.username.charAt(0).toUpperCase()}
                                         </div>
                                         <span>{member.username}</span>
