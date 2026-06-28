@@ -254,6 +254,19 @@ const KanbanBoard = ({ user, role }) => {
         { id: 'done', title: 'Tamamlanan' }
     ];
 
+    let visibleTasks = tasks;
+    if (!isAdmin) {
+        visibleTasks = tasks.filter(task => {
+            if (task.assignee && task.assignee.username === user) return true;
+            if (task.teamId && currentMember && currentMember.teamId) {
+                const taskTeamId = task.teamId._id || task.teamId;
+                const myTeamId = currentMember.teamId._id || currentMember.teamId;
+                if (String(taskTeamId) === String(myTeamId)) return true;
+            }
+            return false;
+        });
+    }
+
     return (
         <div className="kanban-wrapper">
             <div className="board-header">
@@ -270,9 +283,9 @@ const KanbanBoard = ({ user, role }) => {
                         onDrop={(e) => onDrop(e, col.id)}
                     >
                         <div className="col-header">
-                            <h3>{col.title} <span className="badge">{tasks.filter(t => t.status === col.id).length}</span></h3>
+                            <h3>{col.title} <span className="badge">{visibleTasks.filter(t => t.status === col.id).length}</span></h3>
                         </div>
-                        {tasks.filter(t => t.status === col.id)
+                        {visibleTasks.filter(t => t.status === col.id)
                             .sort((a, b) => urgencyOrder[a.urgency] - urgencyOrder[b.urgency])
                             .map(task => (
                             <div 
