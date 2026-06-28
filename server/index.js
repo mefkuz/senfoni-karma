@@ -450,11 +450,6 @@ app.put('/api/tasks/:id', async (req, res) => {
                                     inline: true
                                 },
                                 {
-                                    name: "👤 İşlemi Yapan",
-                                    value: completedBy,
-                                    inline: true
-                                },
-                                {
                                     name: "👥 Ekip",
                                     value: teamName,
                                     inline: true
