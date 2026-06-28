@@ -165,6 +165,12 @@ app.post('/api/auth', async (req, res) => {
 
 app.all('/api/chat-admin', requireUser, async (req, res) => {
     try {
+        console.log('[CHAT-ADMIN] Request:', {
+            method: req.method,
+            user: req.user,
+            apiKeyPrefix: req.headers['x-api-key'] ? req.headers['x-api-key'].substring(0, 8) : 'none',
+            body: req.body
+        });
         const member = await Member.findOne({ username: req.user });
         if (!member || (member.role !== 'admin' && member.role !== 'moderator')) {
             return res.status(403).json({ error: 'Yetkisiz işlem.' });
