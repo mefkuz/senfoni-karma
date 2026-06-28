@@ -30,7 +30,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 
-const Setting = require('./models/Setting');
+
 const { Server } = require('socket.io');
 const http = require('http');
 
@@ -102,6 +102,12 @@ const notifSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 const Notification = mongoose.model('Notification', notifSchema);
+
+const settingSchema = new mongoose.Schema({
+    key: { type: String, required: true, unique: true },
+    value: { type: String, default: '' }
+});
+const Setting = mongoose.model('Setting', settingSchema);
 const messageSchema = new mongoose.Schema({
     sender: { type: String, required: true },
     receiver: { type: String, required: true },
