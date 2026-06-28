@@ -106,8 +106,8 @@ const AdminView = ({ user, role, onExit }) => {
                         <form onSubmit={handleCreateOperation} style={{ display: 'flex', gap: '1rem', alignItems: 'center', background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', marginBottom: '2rem' }}>
                             <input type="text" placeholder="Yeni Operasyon Adı" value={newOpName} onChange={e => setNewOpName(e.target.value)} style={{ flex: 1, padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)' }} required />
                             <select value={newOpDefaultTeam} onChange={e => setNewOpDefaultTeam(e.target.value)} style={{ padding: '0.8rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)' }}>
-                                <option value="">Varsayılan Ekip (İsteğe Bağlı)</option>
-                                {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                <option value="" style={{ background: 'var(--bg-main)', color: 'var(--text-main)' }}>Varsayılan Ekip (İsteğe Bağlı)</option>
+                                {teams.map(t => <option key={t._id} value={t._id} style={{ background: 'var(--bg-main)', color: 'var(--text-main)' }}>{t.name}</option>)}
                             </select>
                             <button type="submit" className="btn-primary"><i className="bi bi-plus"></i> Operasyon Oluştur</button>
                         </form>
@@ -129,10 +129,10 @@ const AdminView = ({ user, role, onExit }) => {
                                         <select 
                                             value={op.defaultTeamId ? op.defaultTeamId._id : ''} 
                                             onChange={(e) => handleUpdateOperationDefaultTeam(op._id, e.target.value)}
-                                            style={{ flex: 1, padding: '0.3rem', background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
+                                            style={{ flex: 1, padding: '0.3rem', background: 'var(--bg-card)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
                                         >
-                                            <option value="">Yok</option>
-                                            {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                            <option value="" style={{ background: 'var(--bg-main)', color: 'var(--text-main)' }}>Yok</option>
+                                            {teams.map(t => <option key={t._id} value={t._id} style={{ background: 'var(--bg-main)', color: 'var(--text-main)' }}>{t.name}</option>)}
                                         </select>
                                     </div>
                                 </div>

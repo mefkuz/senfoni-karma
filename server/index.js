@@ -200,10 +200,15 @@ app.get('/api/operations', async (req, res) => {
     res.json(decrypted);
 });
 app.post('/api/operations', async (req, res) => {
-    const encrypted = encryptFields(req.body, OPE_ENC);
-    const op = new Operation(encrypted);
-    await op.save();
-    res.json(decryptFields(op, OPE_ENC));
+    try {
+        const encrypted = encryptFields(req.body, OPE_ENC);
+        const op = new Operation(encrypted);
+        await op.save();
+        res.json(decryptFields(op, OPE_ENC));
+    } catch (e) {
+        console.error('Error creating operation:', e);
+        res.status(500).json({ error: e.message });
+    }
 });
 app.put('/api/operations/:id', async (req, res) => {
     const encrypted = encryptFields(req.body, OPE_ENC);
