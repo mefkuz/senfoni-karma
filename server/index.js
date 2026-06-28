@@ -113,6 +113,7 @@ const requireUser = (req, res, next) => {
 app.post('/api/auth', async (req, res) => {
     try {
         const { apiKey } = req.body;
+        console.log('[AUTH] Attempt with apiKey:', apiKey);
         // Verify with Senfoni Chat internally via Docker network
         const chatRes = await fetch('http://senfoni-chat:3000/api/auth', {
             method: 'POST',
