@@ -397,15 +397,40 @@ app.put('/api/tasks/:id', async (req, res) => {
         try {
             const webhookSetting = await Setting.findOne({ key: 'WEBHOOK_URL' });
             if (webhookSetting && webhookSetting.value) {
-                // Ignore self-signed certs for local CTF networks just in case
-                const completedBy = req.headers['x-user'] || (task.assignee ? task.assignee.username : 'Bilinmiyor');
+                process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
                 
-                // Fetch the user's team
-                const member = await mongoose.model('Member').findOne({ username: completedBy }).populate('teamId');
-                const teamName = member && member.teamId ? member.teamId.name : 'Bilinmiyor';
+                // Get who did this action
+                let completedBy = req.headers['x-user'] || 'Bilinmiyor';
+                console.log('[WEBHOOK DEBUG] x-user header:', req.headers['x-user']);
+                console.log('[WEBHOOK DEBUG] completedBy:', completedBy);
+                
+                // If x-user is empty, try assignee
+                if (completedBy === 'Bilinmiyor' && task.assignee) {
+                    completedBy = task.assignee.username || 'Bilinmiyor';
+                }
+                
+                // Get team name - need to decrypt since team name is encrypted
+                let teamName = 'Bilinmiyor';
+                if (completedBy !== 'Bilinmiyor') {
+                    const member = await Member.findOne({ username: completedBy }).populate('teamId');
+                    console.log('[WEBHOOK DEBUG] member found:', member ? member.username : 'NOT FOUND');
+                    if (member && member.teamId) {
+                        const decryptedTeam = decryptFields(member.teamId, TEAM_ENC);
+                        teamName = decryptedTeam.name || 'Bilinmiyor';
+                        console.log('[WEBHOOK DEBUG] decrypted team name:', teamName);
+                    }
+                }
+                // Fallback: use the task's own team
+                if (teamName === 'Bilinmiyor' && decryptedTask.teamId) {
+                    teamName = decryptedTask.teamId.name || 'Bilinmiyor';
+                }
+                
+                // Get operation name (already decrypted in decryptedTask)
+                const opName = (decryptedTask.operationId && decryptedTask.operationId.name) ? decryptedTask.operationId.name : 'Genel';
+                console.log('[WEBHOOK DEBUG] opName:', opName, 'teamName:', teamName, 'completedBy:', completedBy);
 
                 const titleText = req.body.status === 'review' ? "✅ Görev Tamamlandı (İnceleme Bekliyor)" : "🏆 Görev Onaylandı";
-                const colorCode = req.body.status === 'review' ? 15105570 : 3066993; // Orange for review, Green for done
+                const colorCode = req.body.status === 'review' ? 15105570 : 3066993;
                 
                 await fetch(webhookSetting.value, {
                     method: 'POST',
@@ -417,17 +442,17 @@ app.put('/api/tasks/:id', async (req, res) => {
                             color: colorCode,
                             fields: [
                                 {
-                                    name: "Operasyon",
-                                    value: decryptedTask.operationId ? decryptedTask.operationId.name : 'Bilinmiyor',
+                                    name: "📋 Operasyon",
+                                    value: opName,
                                     inline: true
                                 },
                                 {
-                                    name: "İşlemi Yapan",
+                                    name: "👤 İşlemi Yapan",
                                     value: completedBy,
                                     inline: true
                                 },
                                 {
-                                    name: "Ekip",
+                                    name: "👥 Ekip",
                                     value: teamName,
                                     inline: true
                                 }
@@ -436,6 +461,7 @@ app.put('/api/tasks/:id', async (req, res) => {
                         }]
                     })
                 });
+                console.log('[WEBHOOK] Successfully sent webhook');
             }
         } catch (e) {
             console.error('Webhook error:', e);
