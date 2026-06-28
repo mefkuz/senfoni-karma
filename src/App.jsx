@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import ApiModal from './components/ApiModal';
 import Auth from './components/Auth';
+import OperationSelect from './components/OperationSelect';
 import TasksView from './views/TasksView';
 import TeamView from './views/TeamView';
 import CalendarView from './views/CalendarView';
@@ -17,10 +18,19 @@ function App() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeOperation, setActiveOperation] = useState(localStorage.getItem('senfoni_active_operation') || '');
+    const [hasSelectedOperation, setHasSelectedOperation] = useState(() => {
+        return localStorage.getItem('senfoni_has_selected_op') === 'true';
+    });
 
     const handleOperationChange = (opId) => {
         setActiveOperation(opId);
         localStorage.setItem('senfoni_active_operation', opId);
+    };
+
+    const handleInitialOperationSelect = (opId) => {
+        handleOperationChange(opId);
+        setHasSelectedOperation(true);
+        localStorage.setItem('senfoni_has_selected_op', 'true');
     };
 
     const handleTabChange = (tab) => {
@@ -40,10 +50,15 @@ function App() {
         localStorage.removeItem('senfoni_auth');
         localStorage.removeItem('senfoni_user');
         localStorage.removeItem('senfoni_role');
+        localStorage.removeItem('senfoni_has_selected_op');
     };
 
     if (!isAuthenticated) {
         return <Auth onLogin={handleLogin} />;
+    }
+
+    if (!hasSelectedOperation) {
+        return <OperationSelect onSelect={handleInitialOperationSelect} role={localStorage.getItem('senfoni_role')} />;
     }
 
     const bottomNavItems = [
