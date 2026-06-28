@@ -131,8 +131,8 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
             try {
                 await fetch(`/api/tasks/${id}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'x-user': user },
-                    body: JSON.stringify({ ...task, status: 'done' })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...task, status: 'done', _completedBy: user })
                 });
                 // Socket.IO will update state
             } catch (err) {
@@ -152,8 +152,8 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         try {
             await fetch(`/api/tasks/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'x-user': user },
-                body: JSON.stringify({ ...task, status })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...task, status, _completedBy: user })
             });
             // Socket.IO will update state
         } catch (err) {
@@ -179,16 +179,16 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
             if (editingTaskId) {
                 await fetch(`/api/tasks/${editingTaskId}`, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'x-user': user },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...payload, _completedBy: user })
                 });
                 // Socket.IO will update the state
                 setEditingTaskId(null);
             } else {
                 await fetch('/api/tasks', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-user': user },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...payload, _completedBy: user })
                 });
                 // Socket.IO will add the task to state
             }
@@ -255,8 +255,8 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         try {
             const res = await fetch(`/api/tasks/${taskToComplete._id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'x-user': user },
-                body: JSON.stringify({ ...taskToComplete, status: 'review', report: reportText, attachment: reportFile })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...taskToComplete, status: 'review', report: reportText, attachment: reportFile, _completedBy: user })
             });
             // Socket.IO will update state
             setSelectedTask(null);
