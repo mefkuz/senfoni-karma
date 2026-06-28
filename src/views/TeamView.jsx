@@ -109,9 +109,9 @@ const TeamView = ({ user, role }) => {
                 {teams.map(team => (
                     <div key={team._id} style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                         {editingTeamId === team._id ? (
-                            <form onSubmit={(e) => handleUpdateTeam(e, team._id)} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', alignItems: 'center' }}>
-                                <input type="text" value={editTeamName} onChange={e => setEditTeamName(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)' }} required />
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                            <form onSubmit={(e) => handleUpdateTeam(e, team._id)} style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem', alignItems: 'center' }}>
+                                <input type="text" value={editTeamName} onChange={e => setEditTeamName(e.target.value)} style={{ flex: '1 1 120px', padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)' }} required />
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.9rem', whiteSpace: 'nowrap' }}>
                                     <input type="checkbox" checked={editIsAdminTeam} onChange={e => setEditIsAdminTeam(e.target.checked)} />
                                     Yönetici
                                 </label>
