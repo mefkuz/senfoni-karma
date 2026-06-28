@@ -41,12 +41,12 @@ const OperationSelect = ({ onSelect, role, user }) => {
                 {loading ? (
                     <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Yükleniyor...</div>
                 ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem' }}>
                         {/* Option to view ALL operations if needed, or maybe just specific ones. 
                             Let's add "Tüm Operasyonlar" as a default card */}
                         <div 
                             onClick={() => onSelect('')}
-                            style={{ background: 'linear-gradient(145deg, var(--bg-card), var(--bg-main))', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px' }}
+                            style={{ flex: '1 1 250px', maxWidth: '350px', background: 'linear-gradient(145deg, var(--bg-card), var(--bg-main))', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px' }}
                             onMouseOver={e => e.currentTarget.style.transform = 'translateY(-5px)'}
                             onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
                         >
@@ -59,7 +59,7 @@ const OperationSelect = ({ onSelect, role, user }) => {
                             <div 
                                 key={op._id}
                                 onClick={() => onSelect(op._id)}
-                                style={{ background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px', position: 'relative' }}
+                                style={{ flex: '1 1 250px', maxWidth: '350px', background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px', position: 'relative' }}
                                 onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.borderColor = 'var(--primary)'; }}
                                 onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'var(--border)'; }}
                             >
@@ -71,7 +71,7 @@ const OperationSelect = ({ onSelect, role, user }) => {
                         {isChatAdmin && (
                             <div 
                                 onClick={() => onSelect('ADMIN_PANEL')}
-                                style={{ background: 'linear-gradient(145deg, var(--bg-card), var(--bg-main))', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--accent)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px' }}
+                                style={{ flex: '1 1 250px', maxWidth: '350px', background: 'linear-gradient(145deg, var(--bg-card), var(--bg-main))', padding: '2rem', borderRadius: 'var(--radius)', border: '1px solid var(--accent)', cursor: 'pointer', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1rem', minHeight: '180px' }}
                                 onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 0 15px rgba(233,69,96,0.3)'; }}
                                 onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
                             >
