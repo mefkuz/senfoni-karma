@@ -13,7 +13,7 @@ import './index.css';
 
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(() => {
-        return localStorage.getItem('senfoni_auth') === 'true';
+        return localStorage.getItem('senfoni_auth') === 'true' && !!localStorage.getItem('senfoni_user');
     });
     const [isApiModalOpen, setIsApiModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('dashboard');
