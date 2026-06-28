@@ -11,7 +11,7 @@ RUN npm install
 COPY dist /app/dist
 
 # Copy server source
-COPY server/index.js ./
+COPY server/index.js server/crypto.js ./
 
 EXPOSE 80
 
