@@ -17,7 +17,8 @@ const TeamView = ({ user, role }) => {
 
     const currentMember = members.find(m => m.username === user);
     const inAdminTeam = currentMember && currentMember.teamId && currentMember.teamId.isAdminTeam;
-    const isAdmin = role === 'admin' || role === 'moderator' || inAdminTeam;
+    const dbRole = currentMember ? (currentMember.role || '').toLowerCase() : '';
+    const isAdmin = role === 'admin' || role === 'moderator' || dbRole === 'admin' || dbRole === 'moderator' || inAdminTeam;
 
     const handleCreateTeam = async (e) => {
         if (e) e.preventDefault();

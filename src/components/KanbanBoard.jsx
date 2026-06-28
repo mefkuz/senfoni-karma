@@ -62,7 +62,8 @@ const KanbanBoard = ({ user, role }) => {
 
     const currentMember = members.find(m => m.username === user);
     const inAdminTeam = currentMember && currentMember.teamId && currentMember.teamId.isAdminTeam;
-    const isAdmin = role === 'admin' || role === 'moderator' || inAdminTeam;
+    const dbRole = currentMember ? (currentMember.role || '').toLowerCase() : '';
+    const isAdmin = role === 'admin' || role === 'moderator' || dbRole === 'admin' || dbRole === 'moderator' || inAdminTeam;
 
     const canMoveTask = (task) => {
         if (!task) return false;
