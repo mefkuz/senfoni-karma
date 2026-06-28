@@ -283,7 +283,24 @@ const AdminView = ({ user, role, onExit }) => {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                             <div>
                                                 <h3 style={{ margin: '0 0 0.5rem 0' }}>{team.name}</h3>
-                                                {team.isAdminTeam && <span className="tag" style={{ background: 'var(--danger)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)' }}>Yönetici Ekibi</span>}
+                                                {team.isAdminTeam && <span className="tag" style={{ background: 'var(--danger)', fontSize: '0.7rem', padding: '0.2rem 0.5rem', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem', display: 'inline-block' }}>Yönetici Ekibi</span>}
+                                                <div style={{ marginTop: '1rem', fontSize: '0.85rem' }}>
+                                                    <div style={{ color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Üyeler:</div>
+                                                    {karmaMembers.filter(m => m.teamId && (m.teamId._id === team._id || m.teamId === team._id)).length > 0 ? (
+                                                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                                                            {karmaMembers.filter(m => m.teamId && (m.teamId._id === team._id || m.teamId === team._id)).map(m => (
+                                                                <li key={m._id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                                    <div style={{ width: '20px', height: '20px', background: 'var(--accent)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 'bold' }}>
+                                                                        {m.username.charAt(0).toUpperCase()}
+                                                                    </div>
+                                                                    <span>{m.username}</span>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    ) : (
+                                                        <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Üye yok</span>
+                                                    )}
+                                                </div>
                                             </div>
                                             <div>
                                                 <button onClick={() => { setEditingTeamId(team._id); setEditTeamName(team.name); setEditIsAdminTeam(team.isAdminTeam || false); }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginRight: '0.5rem' }}><i className="bi bi-pencil"></i></button>
