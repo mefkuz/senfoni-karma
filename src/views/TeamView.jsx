@@ -4,21 +4,26 @@ import Topbar from '../components/Topbar';
 const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
     const [members, setMembers] = useState([]);
     const [teams, setTeams] = useState([]);
+    const [operations, setOperations] = useState([]);
     const [newTeamName, setNewTeamName] = useState('');
     const [newIsAdminTeam, setNewIsAdminTeam] = useState(false);
     const [editingTeamId, setEditingTeamId] = useState(null);
     const [editTeamName, setEditTeamName] = useState('');
     const [editIsAdminTeam, setEditIsAdminTeam] = useState(false);
+    const [newOpName, setNewOpName] = useState('');
+    const [newOpDefaultTeam, setNewOpDefaultTeam] = useState('');
 
     useEffect(() => {
         fetch('/api/members').then(r => r.json()).then(setMembers);
         fetch('/api/teams').then(r => r.json()).then(setTeams);
+        fetch('/api/operations').then(r => r.json()).then(setOperations);
     }, []);
 
     const currentMember = members.find(m => m.username === user);
     const inAdminTeam = currentMember && currentMember.teamId && currentMember.teamId.isAdminTeam;
     const dbRole = currentMember ? (currentMember.role || '').toLowerCase() : '';
     const isAdmin = role === 'admin' || role === 'moderator' || dbRole === 'admin' || dbRole === 'moderator' || inAdminTeam;
+    const isChatAdmin = dbRole === 'admin' || dbRole === 'moderator' || role === 'admin' || role === 'moderator';
 
     const handleCreateTeam = async (e) => {
         if (e) e.preventDefault();
@@ -34,6 +39,55 @@ const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
                 setTeams([...teams, created]);
                 setNewTeamName('');
                 setNewIsAdminTeam(false);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleCreateOperation = async (e) => {
+        if (e) e.preventDefault();
+        if (!newOpName.trim()) return;
+        try {
+            const res = await fetch('/api/operations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newOpName, defaultTeamId: newOpDefaultTeam || null })
+            });
+            if (res.ok) {
+                const created = await res.json();
+                setOperations([...operations, created]);
+                setNewOpName('');
+                setNewOpDefaultTeam('');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteOperation = async (id) => {
+        if (!window.confirm('Bu operasyonu silerseniz, operasyona bağlı tüm görevler SİLİNİR! Emin misiniz?')) return;
+        try {
+            const res = await fetch(`/api/operations/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setOperations(operations.filter(o => o._id !== id));
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleUpdateOperationDefaultTeam = async (opId, teamId) => {
+        try {
+            const op = operations.find(o => o._id === opId);
+            const res = await fetch(`/api/operations/${opId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...op, defaultTeamId: teamId || null })
+            });
+            if (res.ok) {
+                const updated = await res.json();
+                setOperations(operations.map(o => o._id === opId ? updated : o));
             }
         } catch (err) {
             console.error(err);
@@ -176,6 +230,52 @@ const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
                     </ul>
                 </div>
             </div>
+
+            {/* Operations Section - Only for Chat Admins */}
+            {isChatAdmin && (
+                <>
+                    <div className="board-header" style={{ marginTop: '3rem' }}>
+                        <h2>Operasyonlar (Platform Yönetimi)</h2>
+                        <form onSubmit={handleCreateOperation} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <input type="text" placeholder="Yeni Operasyon Adı" value={newOpName} onChange={e => setNewOpName(e.target.value)} style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-main)' }} required />
+                            <select value={newOpDefaultTeam} onChange={e => setNewOpDefaultTeam(e.target.value)} style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-main)' }}>
+                                <option value="">Varsayılan Ekip (İsteğe Bağlı)</option>
+                                {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                            </select>
+                            <button type="submit" className="btn-primary"><i className="bi bi-plus"></i> Operasyon Oluştur</button>
+                        </form>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '2rem', marginTop: '2rem', paddingBottom: '2rem' }}>
+                        {operations.map(op => (
+                            <div key={op._id} style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', position: 'relative' }}>
+                                <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <i className="bi bi-briefcase text-muted"></i>
+                                    {op.name}
+                                </h3>
+                                <button onClick={() => handleDeleteOperation(op._id)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><i className="bi bi-trash"></i></button>
+                                
+                                <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                                    Oluşturulma: {new Date(op.createdAt).toLocaleDateString()}
+                                </div>
+                                
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-main)', padding: '0.5rem', borderRadius: 'var(--radius-sm)' }}>
+                                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Varsayılan Ekip:</span>
+                                    <select 
+                                        value={op.defaultTeamId ? op.defaultTeamId._id : ''} 
+                                        onChange={(e) => handleUpdateOperationDefaultTeam(op._id, e.target.value)}
+                                        style={{ flex: 1, padding: '0.3rem', background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
+                                    >
+                                        <option value="">Yok</option>
+                                        {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+                        ))}
+                        {operations.length === 0 && <p style={{ color: 'var(--text-muted)' }}>Henüz operasyon oluşturulmamış.</p>}
+                    </div>
+                </>
+            )}
         </main>
     );
 };

@@ -6,6 +6,7 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
     const [editingTaskId, setEditingTaskId] = useState(null);
     const [members, setMembers] = useState([]);
     const [teams, setTeams] = useState([]);
+    const [operations, setOperations] = useState([]);
     const [newTask, setNewTask] = useState({ title: '', description: '', urgency: 'normal', status: 'todo', assignType: '', assignId: '', attachment: '', report: '', dueDate: '' });
     const [selectedTask, setSelectedTask] = useState(null);
     const [completingTask, setCompletingTask] = useState(null);
@@ -40,6 +41,11 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         fetch('/api/teams')
             .then(res => res.json())
             .then(data => setTeams(data))
+            .catch(console.error);
+
+        fetch('/api/operations')
+            .then(res => res.json())
+            .then(data => setOperations(data))
             .catch(console.error);
 
         const handleKeyDown = (e) => {
@@ -275,7 +281,19 @@ const KanbanBoard = ({ user, role, activeOperation }) => {
         <div className="kanban-wrapper">
             <div className="board-header">
                 <h2>Görev Yönetimi</h2>
-                {isAdmin && <button className="btn-primary" onClick={() => setIsAdding(true)}><i className="bi bi-plus-lg"></i> Yeni Görev</button>}
+                {isAdmin && <button className="btn-primary" onClick={() => {
+                    let defaultAssignType = '';
+                    let defaultAssignId = '';
+                    if (activeOperation) {
+                        const op = operations.find(o => o._id === activeOperation);
+                        if (op && op.defaultTeamId) {
+                            defaultAssignType = 'team';
+                            defaultAssignId = op.defaultTeamId._id ? op.defaultTeamId._id : op.defaultTeamId;
+                        }
+                    }
+                    setNewTask({...newTask, assignType: defaultAssignType, assignId: defaultAssignId});
+                    setIsAdding(true);
+                }}><i className="bi bi-plus-lg"></i> Yeni Görev</button>}
             </div>
             
             <div className="kanban-board">

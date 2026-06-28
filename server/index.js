@@ -61,6 +61,7 @@ const Team = mongoose.model('Team', teamSchema);
 const operationSchema = new mongoose.Schema({
     name: String,
     description: String,
+    defaultTeamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team', default: null },
     createdAt: { type: Date, default: Date.now }
 });
 const Operation = mongoose.model('Operation', operationSchema);
@@ -190,8 +191,13 @@ app.get('/api/stats', async (req, res) => {
 
 // Operations Routes
 app.get('/api/operations', async (req, res) => {
-    const operations = await Operation.find();
-    res.json(decryptArray(operations, OPE_ENC));
+    const operations = await Operation.find().populate('defaultTeamId');
+    const decrypted = operations.map(o => {
+        const obj = decryptFields(o, OPE_ENC);
+        if (obj.defaultTeamId) obj.defaultTeamId = decryptFields(obj.defaultTeamId, TEAM_ENC);
+        return obj;
+    });
+    res.json(decrypted);
 });
 app.post('/api/operations', async (req, res) => {
     const encrypted = encryptFields(req.body, OPE_ENC);
@@ -201,8 +207,10 @@ app.post('/api/operations', async (req, res) => {
 });
 app.put('/api/operations/:id', async (req, res) => {
     const encrypted = encryptFields(req.body, OPE_ENC);
-    const op = await Operation.findByIdAndUpdate(req.params.id, encrypted, { new: true });
-    res.json(decryptFields(op, OPE_ENC));
+    const op = await Operation.findByIdAndUpdate(req.params.id, encrypted, { new: true }).populate('defaultTeamId');
+    const obj = decryptFields(op, OPE_ENC);
+    if (obj.defaultTeamId) obj.defaultTeamId = decryptFields(obj.defaultTeamId, TEAM_ENC);
+    res.json(obj);
 });
 app.delete('/api/operations/:id', async (req, res) => {
     await Operation.findByIdAndDelete(req.params.id);

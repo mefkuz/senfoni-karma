@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 
 const OperationSelect = ({ onSelect, role, user }) => {
     const [operations, setOperations] = useState([]);
-    const [newOpName, setNewOpName] = useState('');
     const [loading, setLoading] = useState(true);
     const [dbRole, setDbRole] = useState(role || '');
 
@@ -29,37 +28,7 @@ const OperationSelect = ({ onSelect, role, user }) => {
         });
     }, [role, user]);
 
-    const handleCreateOperation = async (e) => {
-        e.preventDefault();
-        if (!newOpName.trim()) return;
-        try {
-            const res = await fetch('/api/operations', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newOpName })
-            });
-            if (res.ok) {
-                const created = await res.json();
-                setOperations([...operations, created]);
-                setNewOpName('');
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
-    const handleDeleteOperation = async (id, e) => {
-        e.stopPropagation();
-        if (!window.confirm('Bu operasyonu silerseniz, operasyona bağlı tüm görevler SİLİNİR! Emin misiniz?')) return;
-        try {
-            const res = await fetch(`/api/operations/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                setOperations(operations.filter(o => o._id !== id));
-            }
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)', padding: '2rem' }}>
@@ -96,16 +65,6 @@ const OperationSelect = ({ onSelect, role, user }) => {
                             >
                                 <i className="bi bi-briefcase" style={{ fontSize: '2.5rem', color: 'var(--text-main)' }}></i>
                                 <h3 style={{ margin: 0, textAlign: 'center' }}>{op.name}</h3>
-                                
-                                {isChatAdmin && (
-                                    <button 
-                                        onClick={(e) => handleDeleteOperation(op._id, e)}
-                                        style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(255,0,0,0.1)', border: 'none', color: 'var(--danger)', width: '30px', height: '30px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-                                        title="Operasyonu Sil"
-                                    >
-                                        <i className="bi bi-trash"></i>
-                                    </button>
-                                )}
                             </div>
                         ))}
 
@@ -121,26 +80,6 @@ const OperationSelect = ({ onSelect, role, user }) => {
                                 <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center' }}>Ekip, Üye ve Platform Yönetimi</span>
                             </div>
                         )}
-                    </div>
-                )}
-
-                {isChatAdmin && (
-                    <div style={{ marginTop: '4rem', background: 'var(--bg-card)', padding: '2rem', borderRadius: 'var(--radius)', border: '1px dashed var(--border)' }}>
-                        <h3 style={{ marginTop: 0, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <i className="bi bi-plus-circle text-primary"></i>
-                            Yeni Operasyon Oluştur
-                        </h3>
-                        <form onSubmit={handleCreateOperation} style={{ display: 'flex', gap: '1rem' }}>
-                            <input 
-                                type="text" 
-                                placeholder="Operasyon Adı (Örn: Sızma Testi A)" 
-                                value={newOpName} 
-                                onChange={e => setNewOpName(e.target.value)} 
-                                style={{ flex: 1, padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '1rem' }} 
-                                required 
-                            />
-                            <button type="submit" className="btn-primary" style={{ padding: '0 2rem', fontSize: '1rem' }}>Oluştur</button>
-                        </form>
                     </div>
                 )}
             </div>
