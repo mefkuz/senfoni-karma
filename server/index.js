@@ -387,8 +387,8 @@ app.put('/api/tasks/:id', async (req, res) => {
     if (decryptedTask.teamId) decryptedTask.teamId = decryptFields(decryptedTask.teamId, TEAM_ENC);
     if (decryptedTask.operationId) decryptedTask.operationId = decryptFields(decryptedTask.operationId, OPE_ENC);
     
-    if (req.body.status === 'done') {
-        const notifMsg = `${task.assignee ? task.assignee.username : (decryptedTask.teamId ? decryptedTask.teamId.name : 'Biri')} "${decryptedTask.title}" görevini tamamladı! ${task.attachment ? 'Dosya eklendi.' : ''}`;
+    if (req.body.status === 'done' || req.body.status === 'review') {
+        const notifMsg = `${task.assignee ? task.assignee.username : (decryptedTask.teamId ? decryptedTask.teamId.name : 'Biri')} "${decryptedTask.title}" görevini ${req.body.status === 'review' ? 'tamamladı (inceleme bekliyor)' : 'onayladı'}! ${task.attachment ? 'Dosya eklendi.' : ''}`;
         const notif = new Notification({
             message: encrypt(notifMsg)
         });
@@ -401,15 +401,17 @@ app.put('/api/tasks/:id', async (req, res) => {
                 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
                 
                 const completedBy = req.headers['x-user'] || (task.assignee ? task.assignee.username : 'Bir ekip üyesi');
+                const titleText = req.body.status === 'review' ? "✅ Görev Tamamlandı (İnceleme Bekliyor)" : "🏆 Görev Onaylandı";
+                const colorCode = req.body.status === 'review' ? 15105570 : 3066993; // Orange for review, Green for done
                 
                 await fetch(webhookSetting.value, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         embeds: [{
-                            title: "✅ Görev Tamamlandı!",
-                            description: `**${decryptedTask.title}** başarıyla tamamlandı.`,
-                            color: 3066993, // Green color
+                            title: titleText,
+                            description: `**${decryptedTask.title}** görevi ${req.body.status === 'review' ? 'tamamlandı ve onaya sunuldu' : 'tamamen kapatıldı'}.`,
+                            color: colorCode,
                             fields: [
                                 {
                                     name: "Operasyon",
@@ -417,7 +419,7 @@ app.put('/api/tasks/:id', async (req, res) => {
                                     inline: true
                                 },
                                 {
-                                    name: "Tamamlayan",
+                                    name: "İşlemi Yapan",
                                     value: completedBy,
                                     inline: true
                                 }
