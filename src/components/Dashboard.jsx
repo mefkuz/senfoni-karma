@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Topbar from './Topbar';
 import KanbanBoard from './KanbanBoard';
 
-const Dashboard = ({ user, role }) => {
+const Dashboard = ({ user, role, activeOperation, onOperationChange }) => {
     const [stats, setStats] = useState({ done: 0, inProgress: 0, late: 0, activeMembers: 0 });
 
     useEffect(() => {
@@ -16,6 +16,9 @@ const Dashboard = ({ user, role }) => {
             const isAdmin = role === 'admin' || role === 'moderator' || dbRole === 'admin' || dbRole === 'moderator' || inAdminTeam;
 
             let visibleTasks = tasksData;
+            if (activeOperation) {
+                visibleTasks = visibleTasks.filter(t => t.operationId && (t.operationId._id === activeOperation || t.operationId === activeOperation));
+            }
             if (!isAdmin) {
                 visibleTasks = tasksData.filter(task => {
                     if (task.assignee && task.assignee.username === user) return true;
@@ -40,7 +43,7 @@ const Dashboard = ({ user, role }) => {
 
     return (
         <main className="main-content">
-            <Topbar user={user} />
+            <Topbar user={user} activeOperation={activeOperation} onOperationChange={onOperationChange} />
 
             <div className="dashboard-grid">
                 {/* Stats */}
@@ -74,7 +77,7 @@ const Dashboard = ({ user, role }) => {
                 </div>
             </div>
 
-            <KanbanBoard user={user} role={role} />
+            <KanbanBoard user={user} role={role} activeOperation={activeOperation} />
         </main>
     );
 };

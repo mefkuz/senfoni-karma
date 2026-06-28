@@ -1,18 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 
-const TeamView = ({ user, role }) => {
+const TeamView = ({ user, role, activeOperation, onOperationChange }) => {
     const [members, setMembers] = useState([]);
     const [teams, setTeams] = useState([]);
+    const [operations, setOperations] = useState([]);
     const [newTeamName, setNewTeamName] = useState('');
     const [newIsAdminTeam, setNewIsAdminTeam] = useState(false);
     const [editingTeamId, setEditingTeamId] = useState(null);
     const [editTeamName, setEditTeamName] = useState('');
     const [editIsAdminTeam, setEditIsAdminTeam] = useState(false);
+    const [newOpName, setNewOpName] = useState('');
 
     useEffect(() => {
         fetch('/api/members').then(r => r.json()).then(setMembers);
         fetch('/api/teams').then(r => r.json()).then(setTeams);
+        fetch('/api/operations').then(r => r.json()).then(setOperations);
     }, []);
 
     const currentMember = members.find(m => m.username === user);
@@ -34,6 +37,37 @@ const TeamView = ({ user, role }) => {
                 setTeams([...teams, created]);
                 setNewTeamName('');
                 setNewIsAdminTeam(false);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleCreateOperation = async (e) => {
+        if (e) e.preventDefault();
+        if (!newOpName.trim()) return;
+        try {
+            const res = await fetch('/api/operations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newOpName })
+            });
+            if (res.ok) {
+                const created = await res.json();
+                setOperations([...operations, created]);
+                setNewOpName('');
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    const handleDeleteOperation = async (id) => {
+        if (!window.confirm('Bu operasyonu silerseniz, operasyona bağlı tüm görevler SİLİNİR! Emin misiniz?')) return;
+        try {
+            const res = await fetch(`/api/operations/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                setOperations(operations.filter(o => o._id !== id));
             }
         } catch (err) {
             console.error(err);
@@ -90,7 +124,7 @@ const TeamView = ({ user, role }) => {
 
     return (
         <main className="main-content">
-            <Topbar user={user} />
+            <Topbar user={user} activeOperation={activeOperation} onOperationChange={onOperationChange} />
             <div className="board-header" style={{ marginTop: '2rem' }}>
                 <h2>Ekip & Takımlar</h2>
                 {isAdmin && (
@@ -175,6 +209,34 @@ const TeamView = ({ user, role }) => {
                         ))}
                     </ul>
                 </div>
+            </div>
+
+            <div className="board-header" style={{ marginTop: '3rem' }}>
+                <h2>Operasyonlar</h2>
+                {isAdmin && (
+                    <form onSubmit={handleCreateOperation} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        <input type="text" placeholder="Yeni Operasyon Adı" value={newOpName} onChange={e => setNewOpName(e.target.value)} style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-main)' }} required />
+                        <button type="submit" className="btn-primary"><i className="bi bi-plus"></i> Operasyon Oluştur</button>
+                    </form>
+                )}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem', paddingBottom: '2rem' }}>
+                {operations.map(op => (
+                    <div key={op._id} style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)', position: 'relative' }}>
+                        <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <i className="bi bi-briefcase text-muted"></i>
+                            {op.name}
+                        </h3>
+                        {isAdmin && (
+                            <button onClick={() => handleDeleteOperation(op._id)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><i className="bi bi-trash"></i></button>
+                        )}
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                            Oluşturulma: {new Date(op.createdAt).toLocaleDateString()}
+                        </div>
+                    </div>
+                ))}
+                {operations.length === 0 && <p style={{ color: 'var(--text-muted)' }}>Henüz operasyon oluşturulmamış.</p>}
             </div>
         </main>
     );

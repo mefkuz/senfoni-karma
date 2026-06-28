@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 
-const Topbar = ({ user }) => {
+const Topbar = ({ user, activeOperation, onOperationChange }) => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotifOpen, setIsNotifOpen] = useState(false);
     const [notifs, setNotifs] = useState([]);
+    const [operations, setOperations] = useState([]);
     
     useEffect(() => {
         fetch('/api/notifications').then(r => r.json()).then(setNotifs).catch(console.error);
+        fetch('/api/operations').then(r => r.json()).then(setOperations).catch(console.error);
         const interval = setInterval(() => {
             fetch('/api/notifications').then(r => r.json()).then(setNotifs).catch(console.error);
         }, 10000);
@@ -24,6 +26,21 @@ const Topbar = ({ user }) => {
             </div>
             
             <div className="topbar-actions">
+                {operations.length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-main)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+                        <i className="bi bi-briefcase text-muted"></i>
+                        <select 
+                            value={activeOperation || ''} 
+                            onChange={(e) => onOperationChange && onOperationChange(e.target.value)}
+                            style={{ background: 'transparent', border: 'none', color: 'var(--text-main)', outline: 'none', fontSize: '0.9rem', cursor: 'pointer' }}
+                        >
+                            <option value="">Tüm Operasyonlar</option>
+                            {operations.map(op => (
+                                <option key={op._id} value={op._id}>{op.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                )}
                 <div className="search-bar">
                     <i className="bi bi-search"></i>
                     <input type="text" placeholder="Görev veya üye ara..." />

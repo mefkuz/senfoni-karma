@@ -10,6 +10,7 @@ const { encrypt, decrypt, encryptFields, decryptFields, decryptArray } = require
 // Fields to encrypt per model
 const TASK_ENC = ['title', 'description', 'report'];
 const TEAM_ENC = ['name', 'description'];
+const OPE_ENC = ['name', 'description'];
 const NOTIF_ENC = ['message'];
 const MSG_ENC = ['content'];
 
@@ -57,6 +58,13 @@ const teamSchema = new mongoose.Schema({
 });
 const Team = mongoose.model('Team', teamSchema);
 
+const operationSchema = new mongoose.Schema({
+    name: String,
+    description: String,
+    createdAt: { type: Date, default: Date.now }
+});
+const Operation = mongoose.model('Operation', operationSchema);
+
 const memberSchema = new mongoose.Schema({
     username: String, // from Senfoni Chat
     role: { type: String, default: 'Member' },
@@ -73,7 +81,8 @@ const taskSchema = new mongoose.Schema({
     attachment: String,
     report: String,
     assignee: { type: mongoose.Schema.Types.ObjectId, ref: 'Member' },
-    teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' }
+    teamId: { type: mongoose.Schema.Types.ObjectId, ref: 'Team' },
+    operationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Operation' }
 });
 const Task = mongoose.model('Task', taskSchema);
 
@@ -179,6 +188,28 @@ app.get('/api/stats', async (req, res) => {
     }
 });
 
+// Operations Routes
+app.get('/api/operations', async (req, res) => {
+    const operations = await Operation.find();
+    res.json(decryptArray(operations, OPE_ENC));
+});
+app.post('/api/operations', async (req, res) => {
+    const encrypted = encryptFields(req.body, OPE_ENC);
+    const op = new Operation(encrypted);
+    await op.save();
+    res.json(decryptFields(op, OPE_ENC));
+});
+app.put('/api/operations/:id', async (req, res) => {
+    const encrypted = encryptFields(req.body, OPE_ENC);
+    const op = await Operation.findByIdAndUpdate(req.params.id, encrypted, { new: true });
+    res.json(decryptFields(op, OPE_ENC));
+});
+app.delete('/api/operations/:id', async (req, res) => {
+    await Operation.findByIdAndDelete(req.params.id);
+    await Task.deleteMany({ operationId: req.params.id });
+    res.json({ success: true });
+});
+
 // Teams Routes
 app.get('/api/teams', async (req, res) => {
     const teams = await Team.find();
@@ -252,10 +283,11 @@ app.delete('/api/members/by-username/:username', async (req, res) => {
 
 // Tasks Routes
 app.get('/api/tasks', async (req, res) => {
-    const tasks = await Task.find().populate('assignee').populate('teamId');
+    const tasks = await Task.find().populate('assignee').populate('teamId').populate('operationId');
     const decrypted = tasks.map(t => {
         const obj = decryptFields(t, TASK_ENC);
         if (obj.teamId) obj.teamId = decryptFields(obj.teamId, TEAM_ENC);
+        if (obj.operationId) obj.operationId = decryptFields(obj.operationId, OPE_ENC);
         return obj;
     });
     res.json(decrypted);
@@ -267,18 +299,21 @@ app.post('/api/tasks', async (req, res) => {
     await task.save();
     await task.populate('assignee');
     await task.populate('teamId');
+    await task.populate('operationId');
     const obj = decryptFields(task, TASK_ENC);
     if (obj.teamId) obj.teamId = decryptFields(obj.teamId, TEAM_ENC);
+    if (obj.operationId) obj.operationId = decryptFields(obj.operationId, OPE_ENC);
     res.json(obj);
 });
 
 app.put('/api/tasks/:id', async (req, res) => {
     const encrypted = encryptFields(req.body, TASK_ENC);
-    const task = await Task.findByIdAndUpdate(req.params.id, encrypted, { new: true }).populate('assignee').populate('teamId');
+    const task = await Task.findByIdAndUpdate(req.params.id, encrypted, { new: true }).populate('assignee').populate('teamId').populate('operationId');
     
     // Decrypt for notification text and response
     const decryptedTask = decryptFields(task, TASK_ENC);
     if (decryptedTask.teamId) decryptedTask.teamId = decryptFields(decryptedTask.teamId, TEAM_ENC);
+    if (decryptedTask.operationId) decryptedTask.operationId = decryptFields(decryptedTask.operationId, OPE_ENC);
     
     if (req.body.status === 'done') {
         const notifMsg = `${task.assignee ? task.assignee.username : (decryptedTask.teamId ? decryptedTask.teamId.name : 'Biri')} "${decryptedTask.title}" görevini tamamladı! ${task.attachment ? 'Dosya eklendi.' : ''}`;

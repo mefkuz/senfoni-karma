@@ -16,6 +16,12 @@ function App() {
     const [isApiModalOpen, setIsApiModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState('dashboard');
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [activeOperation, setActiveOperation] = useState(localStorage.getItem('senfoni_active_operation') || '');
+
+    const handleOperationChange = (opId) => {
+        setActiveOperation(opId);
+        localStorage.setItem('senfoni_active_operation', opId);
+    };
 
     const handleTabChange = (tab) => {
         setActiveTab(tab);
@@ -74,11 +80,11 @@ function App() {
 
             {/* Page content */}
             <div className="page-content">
-                {activeTab === 'dashboard' && <Dashboard user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
-                {activeTab === 'tasks' && <TasksView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
-                {activeTab === 'team' && <TeamView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
-                {activeTab === 'calendar' && <CalendarView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
-                {activeTab === 'communication' && <CommunicationView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
+                {activeTab === 'dashboard' && <Dashboard user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} activeOperation={activeOperation} onOperationChange={handleOperationChange} />}
+                {activeTab === 'tasks' && <TasksView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} activeOperation={activeOperation} onOperationChange={handleOperationChange} />}
+                {activeTab === 'team' && <TeamView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} activeOperation={activeOperation} onOperationChange={handleOperationChange} />}
+                {activeTab === 'calendar' && <CalendarView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} activeOperation={activeOperation} onOperationChange={handleOperationChange} />}
+                {activeTab === 'communication' && <CommunicationView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} activeOperation={activeOperation} onOperationChange={handleOperationChange} />}
             </div>
 
             {/* Mobile: Bottom navigation bar */}

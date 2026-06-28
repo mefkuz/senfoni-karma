@@ -1,10 +1,10 @@
 import React from 'react';
 import Topbar from '../components/Topbar';
 
-const CalendarView = ({ user }) => {
+const CalendarView = ({ user, role, activeOperation, onOperationChange }) => {
     return (
         <main className="main-content">
-            <Topbar user={user} />
+            <Topbar user={user} activeOperation={activeOperation} onOperationChange={onOperationChange} />
             <div className="board-header" style={{ marginTop: '2rem' }}>
                 <h2>Takvim</h2>
             </div>

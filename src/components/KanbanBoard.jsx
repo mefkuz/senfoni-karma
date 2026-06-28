@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const KanbanBoard = ({ user, role }) => {
+const KanbanBoard = ({ user, role, activeOperation }) => {
     const [tasks, setTasks] = useState([]);
     const [isAdding, setIsAdding] = useState(false);
     const [editingTaskId, setEditingTaskId] = useState(null);
@@ -151,7 +151,8 @@ const KanbanBoard = ({ user, role }) => {
                 attachment: newTask.attachment,
                 dueDate: newTask.dueDate,
                 assignee: newTask.assignType === 'member' ? newTask.assignId : null,
-                teamId: newTask.assignType === 'team' ? newTask.assignId : null
+                teamId: newTask.assignType === 'team' ? newTask.assignId : null,
+                operationId: activeOperation || null
             };
 
             if (editingTaskId) {
@@ -255,8 +256,11 @@ const KanbanBoard = ({ user, role }) => {
     ];
 
     let visibleTasks = tasks;
+    if (activeOperation) {
+        visibleTasks = visibleTasks.filter(t => t.operationId && (t.operationId._id === activeOperation || t.operationId === activeOperation));
+    }
     if (!isAdmin) {
-        visibleTasks = tasks.filter(task => {
+        visibleTasks = visibleTasks.filter(task => {
             if (task.assignee && task.assignee.username === user) return true;
             if (task.teamId && currentMember && currentMember.teamId) {
                 const taskTeamId = task.teamId._id || task.teamId;
