@@ -1,24 +1,33 @@
 import React, { useState, useEffect } from 'react';
 
-const OperationSelect = ({ onSelect, role }) => {
+const OperationSelect = ({ onSelect, role, user }) => {
     const [operations, setOperations] = useState([]);
     const [newOpName, setNewOpName] = useState('');
     const [loading, setLoading] = useState(true);
+    const [dbRole, setDbRole] = useState(role || '');
 
-    const isChatAdmin = role === 'admin' || role === 'moderator';
+    const isChatAdmin = dbRole && (dbRole.toLowerCase() === 'admin' || dbRole.toLowerCase() === 'moderator');
+
+
 
     useEffect(() => {
-        fetch('/api/operations')
-            .then(r => r.json())
-            .then(data => {
-                setOperations(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
-    }, []);
+        Promise.all([
+            fetch('/api/operations').then(r => r.json()),
+            fetch('/api/members').then(r => r.json())
+        ])
+        .then(([opsData, membersData]) => {
+            setOperations(opsData);
+            if (!role && user) {
+                const me = membersData.find(m => m.username === user);
+                if (me && me.role) setDbRole(me.role);
+            }
+            setLoading(false);
+        })
+        .catch(err => {
+            console.error(err);
+            setLoading(false);
+        });
+    }, [role, user]);
 
     const handleCreateOperation = async (e) => {
         e.preventDefault();

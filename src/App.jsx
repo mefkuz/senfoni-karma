@@ -61,7 +61,7 @@ function App() {
     }
 
     if (!hasSelectedOperation) {
-        return <OperationSelect onSelect={handleInitialOperationSelect} role={localStorage.getItem('senfoni_role')} />;
+        return <OperationSelect onSelect={handleInitialOperationSelect} role={localStorage.getItem('senfoni_role')} user={localStorage.getItem('senfoni_user')} />;
     }
 
     const bottomNavItems = [
