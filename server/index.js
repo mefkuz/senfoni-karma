@@ -52,7 +52,8 @@ mongoose.connect(MONGO_URI).then(() => {
 // Schemas
 const teamSchema = new mongoose.Schema({
     name: String,
-    description: String
+    description: String,
+    isAdminTeam: { type: Boolean, default: false }
 });
 const Team = mongoose.model('Team', teamSchema);
 

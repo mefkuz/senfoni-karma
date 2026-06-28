@@ -5,13 +5,19 @@ const TeamView = ({ user, role }) => {
     const [members, setMembers] = useState([]);
     const [teams, setTeams] = useState([]);
     const [newTeamName, setNewTeamName] = useState('');
+    const [newIsAdminTeam, setNewIsAdminTeam] = useState(false);
     const [editingTeamId, setEditingTeamId] = useState(null);
     const [editTeamName, setEditTeamName] = useState('');
+    const [editIsAdminTeam, setEditIsAdminTeam] = useState(false);
 
     useEffect(() => {
         fetch('/api/members').then(r => r.json()).then(setMembers);
         fetch('/api/teams').then(r => r.json()).then(setTeams);
     }, []);
+
+    const currentMember = members.find(m => m.username === user);
+    const inAdminTeam = currentMember && currentMember.teamId && currentMember.teamId.isAdminTeam;
+    const isAdmin = role === 'admin' || role === 'moderator' || inAdminTeam;
 
     const handleCreateTeam = async (e) => {
         if (e) e.preventDefault();
@@ -20,12 +26,13 @@ const TeamView = ({ user, role }) => {
             const res = await fetch('/api/teams', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: newTeamName })
+                body: JSON.stringify({ name: newTeamName, isAdminTeam: newIsAdminTeam })
             });
             if (res.ok) {
                 const created = await res.json();
                 setTeams([...teams, created]);
                 setNewTeamName('');
+                setNewIsAdminTeam(false);
             }
         } catch (err) {
             console.error(err);
@@ -68,7 +75,7 @@ const TeamView = ({ user, role }) => {
             const res = await fetch(`/api/teams/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: editTeamName })
+                body: JSON.stringify({ name: editTeamName, isAdminTeam: editIsAdminTeam })
             });
             if (res.ok) {
                 const updated = await res.json();
@@ -85,9 +92,13 @@ const TeamView = ({ user, role }) => {
             <Topbar user={user} />
             <div className="board-header" style={{ marginTop: '2rem' }}>
                 <h2>Ekip & Takımlar</h2>
-                {role === 'admin' && (
-                    <form onSubmit={handleCreateTeam} style={{ display: 'flex', gap: '1rem' }}>
+                {isAdmin && (
+                    <form onSubmit={handleCreateTeam} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                         <input type="text" placeholder="Yeni Takım Adı" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-main)' }} required />
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}>
+                            <input type="checkbox" checked={newIsAdminTeam} onChange={e => setNewIsAdminTeam(e.target.checked)} />
+                            Yönetici Ekibi
+                        </label>
                         <button type="submit" className="btn-primary"><i className="bi bi-plus"></i> Takım Oluştur</button>
                     </form>
                 )}
@@ -97,17 +108,24 @@ const TeamView = ({ user, role }) => {
                 {teams.map(team => (
                     <div key={team._id} style={{ background: 'var(--bg-card)', padding: '1.5rem', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                         {editingTeamId === team._id ? (
-                            <form onSubmit={(e) => handleUpdateTeam(e, team._id)} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+                            <form onSubmit={(e) => handleUpdateTeam(e, team._id)} style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem', alignItems: 'center' }}>
                                 <input type="text" value={editTeamName} onChange={e => setEditTeamName(e.target.value)} style={{ flex: 1, padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-main)', color: 'var(--text-main)' }} required />
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
+                                    <input type="checkbox" checked={editIsAdminTeam} onChange={e => setEditIsAdminTeam(e.target.checked)} />
+                                    Yönetici
+                                </label>
                                 <button type="submit" className="btn-primary" style={{ padding: '0.5rem' }}><i className="bi bi-check"></i></button>
                                 <button type="button" onClick={() => setEditingTeamId(null)} className="btn-primary" style={{ padding: '0.5rem', background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)' }}><i className="bi bi-x"></i></button>
                             </form>
                         ) : (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
-                                <h3 style={{ margin: 0 }}>{team.name}</h3>
-                                {role === 'admin' && (
+                                <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    {team.name}
+                                    {team.isAdminTeam && <span className="tag" style={{ background: 'var(--danger)', fontSize: '0.7rem' }}>Yönetici Ekibi</span>}
+                                </h3>
+                                {isAdmin && (
                                     <div>
-                                        <button onClick={() => { setEditingTeamId(team._id); setEditTeamName(team.name); }} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', marginRight: '0.5rem' }}><i className="bi bi-pencil"></i></button>
+                                        <button onClick={() => { setEditingTeamId(team._id); setEditTeamName(team.name); setEditIsAdminTeam(team.isAdminTeam || false); }} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', marginRight: '0.5rem' }}><i className="bi bi-pencil"></i></button>
                                         <button onClick={() => handleDeleteTeam(team._id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><i className="bi bi-trash"></i></button>
                                     </div>
                                 )}
@@ -122,7 +140,7 @@ const TeamView = ({ user, role }) => {
                                         </div>
                                         <span>{member.username}</span>
                                     </div>
-                                    {role === 'admin' && (
+                                    {isAdmin && (
                                         <button onClick={() => handleAssignMember(member._id, null)} style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer' }} title="Takımdan Çıkar"><i className="bi bi-x-circle"></i></button>
                                     )}
                                 </li>
@@ -146,7 +164,7 @@ const TeamView = ({ user, role }) => {
                                     </div>
                                     <span>{member.username}</span>
                                 </div>
-                                {role === 'admin' && (
+                                {isAdmin && (
                                     <select onChange={(e) => handleAssignMember(member._id, e.target.value)} defaultValue="" style={{ padding: '0.2rem', background: 'var(--bg-main)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
                                         <option value="" disabled>Takıma Ata...</option>
                                         {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
