@@ -28,6 +28,11 @@
     font-family: 'Outfit', sans-serif;
 }
 
+select option {
+    background-color: var(--bg-card);
+    color: var(--text-main);
+}
+
 body {
     background-color: var(--bg-main);
     color: var(--text-main);
