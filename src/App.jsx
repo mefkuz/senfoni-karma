@@ -8,6 +8,7 @@ import TasksView from './views/TasksView';
 import TeamView from './views/TeamView';
 import CalendarView from './views/CalendarView';
 import CommunicationView from './views/CommunicationView';
+import AdminView from './views/AdminView';
 import './index.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [activeOperation, setActiveOperation] = useState(localStorage.getItem('senfoni_active_operation') || '');
     const [hasSelectedOperation, setHasSelectedOperation] = useState(false);
+    const [isAdminMode, setIsAdminMode] = useState(false);
 
     const handleOperationChange = (opId) => {
         setActiveOperation(opId);
@@ -27,13 +29,14 @@ function App() {
 
     const handleInitialOperationSelect = (opId) => {
         if (opId === 'ADMIN_PANEL') {
-            handleOperationChange('');
-            setActiveTab('team');
+            setIsAdminMode(true);
+            setHasSelectedOperation(false);
         } else {
+            setIsAdminMode(false);
             handleOperationChange(opId);
             setActiveTab('dashboard');
+            setHasSelectedOperation(true);
         }
-        setHasSelectedOperation(true);
     };
 
     const handleTabChange = (tab) => {
@@ -58,6 +61,10 @@ function App() {
 
     if (!isAuthenticated) {
         return <Auth onLogin={handleLogin} />;
+    }
+
+    if (isAdminMode) {
+        return <AdminView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} onExit={() => setIsAdminMode(false)} />;
     }
 
     if (!hasSelectedOperation) {
