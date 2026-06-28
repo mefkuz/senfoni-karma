@@ -32,7 +32,7 @@ const OperationSelect = ({ onSelect, role, user }) => {
 
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-main)', padding: '2rem' }}>
-            <div style={{ maxWidth: '800px', width: '100%' }}>
+            <div style={{ maxWidth: '1200px', width: '100%' }}>
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <h1 style={{ fontSize: '2.5rem', color: 'var(--text-main)', marginBottom: '0.5rem', textShadow: '0 0 20px rgba(255,255,255,0.1)' }}>Operasyon Seçimi</h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Lütfen girmek istediğiniz operasyonu seçin.</p>
