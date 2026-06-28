@@ -22,16 +22,18 @@ function App() {
         setSidebarOpen(false);
     };
 
-    const handleLogin = (user) => {
+    const handleLogin = (user, role) => {
         setIsAuthenticated(true);
         localStorage.setItem('senfoni_auth', 'true');
         localStorage.setItem('senfoni_user', user);
+        if (role) localStorage.setItem('senfoni_role', role);
     };
 
     const handleLogout = () => {
         setIsAuthenticated(false);
         localStorage.removeItem('senfoni_auth');
         localStorage.removeItem('senfoni_user');
+        localStorage.removeItem('senfoni_role');
     };
 
     if (!isAuthenticated) {
@@ -72,11 +74,11 @@ function App() {
 
             {/* Page content */}
             <div className="page-content">
-                {activeTab === 'dashboard' && <Dashboard user={localStorage.getItem('senfoni_user')} />}
-                {activeTab === 'tasks' && <TasksView user={localStorage.getItem('senfoni_user')} />}
-                {activeTab === 'team' && <TeamView user={localStorage.getItem('senfoni_user')} />}
-                {activeTab === 'calendar' && <CalendarView user={localStorage.getItem('senfoni_user')} />}
-                {activeTab === 'communication' && <CommunicationView user={localStorage.getItem('senfoni_user')} />}
+                {activeTab === 'dashboard' && <Dashboard user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
+                {activeTab === 'tasks' && <TasksView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
+                {activeTab === 'team' && <TeamView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
+                {activeTab === 'calendar' && <CalendarView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
+                {activeTab === 'communication' && <CommunicationView user={localStorage.getItem('senfoni_user')} role={localStorage.getItem('senfoni_role')} />}
             </div>
 
             {/* Mobile: Bottom navigation bar */}

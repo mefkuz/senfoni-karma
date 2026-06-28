@@ -137,7 +137,7 @@ app.post('/api/auth', async (req, res) => {
                 }
             }
 
-            res.json({ valid: true, user: chatData.username });
+            res.json({ valid: true, user: chatData.username, role: chatData.role });
         } else {
             res.status(401).json({ valid: false, error: 'Geçersiz API Token.' });
         }

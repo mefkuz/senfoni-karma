@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Topbar from '../components/Topbar';
 
-const TeamView = ({ user }) => {
+const TeamView = ({ user, role }) => {
     const [members, setMembers] = useState([]);
     const [teams, setTeams] = useState([]);
     const [newTeamName, setNewTeamName] = useState('');
@@ -85,10 +85,12 @@ const TeamView = ({ user }) => {
             <Topbar user={user} />
             <div className="board-header" style={{ marginTop: '2rem' }}>
                 <h2>Ekip & Takımlar</h2>
-                <form onSubmit={handleCreateTeam} style={{ display: 'flex', gap: '1rem' }}>
-                    <input type="text" placeholder="Yeni Takım Adı" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-main)' }} required />
-                    <button type="submit" className="btn-primary"><i className="bi bi-plus"></i> Takım Oluştur</button>
-                </form>
+                {role === 'admin' && (
+                    <form onSubmit={handleCreateTeam} style={{ display: 'flex', gap: '1rem' }}>
+                        <input type="text" placeholder="Yeni Takım Adı" value={newTeamName} onChange={e => setNewTeamName(e.target.value)} style={{ padding: '0.5rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-main)' }} required />
+                        <button type="submit" className="btn-primary"><i className="bi bi-plus"></i> Takım Oluştur</button>
+                    </form>
+                )}
             </div>
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem', marginTop: '2rem' }}>
@@ -103,10 +105,12 @@ const TeamView = ({ user }) => {
                         ) : (
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>
                                 <h3 style={{ margin: 0 }}>{team.name}</h3>
-                                <div>
-                                    <button onClick={() => { setEditingTeamId(team._id); setEditTeamName(team.name); }} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', marginRight: '0.5rem' }}><i className="bi bi-pencil"></i></button>
-                                    <button onClick={() => handleDeleteTeam(team._id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><i className="bi bi-trash"></i></button>
-                                </div>
+                                {role === 'admin' && (
+                                    <div>
+                                        <button onClick={() => { setEditingTeamId(team._id); setEditTeamName(team.name); }} style={{ background: 'none', border: 'none', color: 'var(--text-main)', cursor: 'pointer', marginRight: '0.5rem' }}><i className="bi bi-pencil"></i></button>
+                                        <button onClick={() => handleDeleteTeam(team._id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer' }}><i className="bi bi-trash"></i></button>
+                                    </div>
+                                )}
                             </div>
                         )}
                         <ul style={{ listStyle: 'none', padding: 0 }}>
@@ -118,7 +122,9 @@ const TeamView = ({ user }) => {
                                         </div>
                                         <span>{member.username}</span>
                                     </div>
-                                    <button onClick={() => handleAssignMember(member._id, null)} style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer' }} title="Takımdan Çıkar"><i className="bi bi-x-circle"></i></button>
+                                    {role === 'admin' && (
+                                        <button onClick={() => handleAssignMember(member._id, null)} style={{ background: 'transparent', border: 'none', color: 'var(--danger)', cursor: 'pointer' }} title="Takımdan Çıkar"><i className="bi bi-x-circle"></i></button>
+                                    )}
                                 </li>
                             ))}
                             {members.filter(m => m.teamId && m.teamId._id === team._id).length === 0 && (
@@ -140,10 +146,12 @@ const TeamView = ({ user }) => {
                                     </div>
                                     <span>{member.username}</span>
                                 </div>
-                                <select onChange={(e) => handleAssignMember(member._id, e.target.value)} defaultValue="" style={{ padding: '0.2rem', background: 'var(--bg-main)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
-                                    <option value="" disabled>Takıma Ata...</option>
-                                    {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
-                                </select>
+                                {role === 'admin' && (
+                                    <select onChange={(e) => handleAssignMember(member._id, e.target.value)} defaultValue="" style={{ padding: '0.2rem', background: 'var(--bg-main)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                                        <option value="" disabled>Takıma Ata...</option>
+                                        {teams.map(t => <option key={t._id} value={t._id}>{t.name}</option>)}
+                                    </select>
+                                )}
                             </li>
                         ))}
                     </ul>

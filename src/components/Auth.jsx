@@ -15,7 +15,7 @@ const Auth = ({ onLogin }) => {
             });
             const data = await res.json();
             if (data.valid) {
-                onLogin(data.user);
+                onLogin(data.user, data.role);
             } else {
                 setError('Geçersiz API Token.');
             }

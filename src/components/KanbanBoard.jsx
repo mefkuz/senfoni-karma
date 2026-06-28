@@ -96,7 +96,29 @@ const KanbanBoard = ({ user }) => {
         const task = tasks.find(t => t._id === id);
         if (!task || task.status === status || !canMoveTask(task)) return;
 
+        // Only admins can move tasks to 'done'
         if (status === 'done') {
+            if (!isAdmin) {
+                alert('Sadece yöneticiler görevleri onaylayıp "Tamamlandı" olarak işaretleyebilir.');
+                return;
+            }
+            // Admins can just drop to done directly
+            try {
+                const res = await fetch(`/api/tasks/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...task, status: 'done' })
+                });
+                const updated = await res.json();
+                setTasks(tasks.map(t => t._id === id ? updated : t));
+            } catch (err) {
+                console.error('Drag drop error:', err);
+            }
+            return;
+        }
+
+        // When moving to 'review', ask for a report
+        if (status === 'review') {
             setCompletingTask(task);
             setReportText(task.report || '');
             setReportFile(task.attachment || '');
@@ -383,7 +405,7 @@ const KanbanBoard = ({ user }) => {
                                     {reportFile && <p style={{ color: '#2ecc71', fontSize: '0.8rem', marginTop: '0.5rem' }}>✓ Dosya başarıyla yüklendi.</p>}
                                 </div>
                                 
-                                <button type="submit" className="btn-primary" disabled={isUploading} style={{ width: '100%', background: '#2ecc71', color: '#000', padding: '1rem', fontSize: '1.1rem', fontWeight: 'bold', border: 'none', borderRadius: 'var(--radius)' }}><i className="bi bi-check-lg"></i> {isUploading ? 'Dosya Yükleniyor...' : 'Görevi Tamamla ve Raporla'}</button>
+                                <button type="submit" className="btn-primary" disabled={isUploading} style={{ width: '100%', background: '#2ecc71', color: '#000', padding: '1rem', fontSize: '1.1rem', fontWeight: 'bold', border: 'none', borderRadius: 'var(--radius)' }}><i className="bi bi-check-lg"></i> {isUploading ? 'Dosya Yükleniyor...' : 'İncelemeye Gönder (Raporla)'}</button>
                             </form>
                         )}
                     </div>
