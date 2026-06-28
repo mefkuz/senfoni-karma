@@ -117,28 +117,6 @@ const messageSchema = new mongoose.Schema({
 });
 const Message = mongoose.model('Message', messageSchema);
 
-// Test Webhook Middleware (All Requests)
-app.use(async (req, res, next) => {
-    if (req.path.startsWith('/api/') && req.method !== 'GET') {
-        try {
-            const webhookSetting = await Setting.findOne({ key: 'WEBHOOK_URL' });
-            if (webhookSetting && webhookSetting.value) {
-                process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-                fetch(webhookSetting.value, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: `🛠️ **TEST İSTEĞİ (API)**\n**Yol:** \`${req.method} ${req.path}\`\n**Kullanıcı:** ${req.headers['x-user'] || 'Bilinmiyor'}\n**Body:** \`\`\`json\n${JSON.stringify(req.body, null, 2).substring(0, 500)}\n\`\`\``
-                    })
-                }).catch(err => console.error('Test Webhook Err:', err));
-            }
-        } catch (e) {
-            console.error('Webhook middleware error:', e);
-        }
-    }
-    next();
-});
-
 const requireUser = (req, res, next) => {
     const user = req.headers['x-user'];
     if (!user) return res.status(401).json({ error: 'Unauthorized' });
