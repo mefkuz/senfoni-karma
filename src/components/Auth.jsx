@@ -15,6 +15,7 @@ const Auth = ({ onLogin }) => {
             });
             const data = await res.json();
             if (data.valid) {
+                localStorage.setItem('senfoni_api_key', apiKey);
                 onLogin(data.user, data.role);
             } else {
                 setError('Geçersiz API Token.');

@@ -57,6 +57,8 @@ function App() {
         localStorage.removeItem('senfoni_user');
         localStorage.removeItem('senfoni_role');
         localStorage.removeItem('senfoni_has_selected_op');
+        localStorage.removeItem('senfoni_api_key');
+        localStorage.removeItem('senfoni_chat_api_key');
     };
 
     if (!isAuthenticated) {
