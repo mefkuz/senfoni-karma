@@ -379,6 +379,7 @@ app.post('/api/tasks', async (req, res) => {
 });
 
 app.put('/api/tasks/:id', async (req, res) => {
+    console.log('[DEBUG] PUT /api/tasks/:id body:', req.body);
     const encrypted = encryptFields(req.body, TASK_ENC);
     const task = await Task.findByIdAndUpdate(req.params.id, encrypted, { new: true }).populate('assignee').populate('teamId').populate('operationId');
     
